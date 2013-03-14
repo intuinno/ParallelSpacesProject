@@ -41,12 +41,16 @@ $('#page1').live('pageinit', function() {
 	var ordinalColor = d3.scale.category10();
 
 	var movieVQnum = 0;
+	var maxStarRadius = 50;
+	var minStarRadius = 10;
 
 	
 
 	var x = d3.scale.linear().domain([0, 1]).range([margin, w - margin]);
 
 	var y = d3.scale.linear().domain([0, 1]).range([ h - margin, margin]);
+	
+	var rMovieScale = d3.scale.linear().range([minStarRadius, maxStarRadius]);
 	
 	
 	var xAxis	= d3.svg.axis()
@@ -125,9 +129,14 @@ $('#page1').live('pageinit', function() {
 
 	})
 
-	d3.csv("data/movieSpace_year.csv", function(movieCSV) {
+	d3.csv("data/movieSpaceNoNormal.csv", function(movieCSV) {
 
 		movieData = movieCSV;
+		
+		//Set up Scales after reading data
+		
+		rMovieScale.domain(d3.extent(movieData, function(d){ return +d.numReview; }));
+		
 
 		for (var count = 0; count < movieData.length; count++) {
 
@@ -148,7 +157,7 @@ $('#page1').live('pageinit', function() {
 						return y(+d.Y);
 					})
 					.attr("r", function(d) {
-						return (+d.numReview * 10);
+						return rMovieScale(+d.numReview);
 					})
 					.attr("fill", function(d) {
 						return d3.hsl(movieStarHue, d.avgReview, d.avgReview);
@@ -307,7 +316,7 @@ $('#page1').live('pageinit', function() {
 			.attr("transform","translate(" + margin + ",0)")
 			.call(yAxisUser);
 	
-	d3.csv("data/userSpace.csv", function(userCSV) {
+	d3.csv("data/userSpaceNoNormal.csv", function(userCSV) {
 
 		userData = userCSV;
 
