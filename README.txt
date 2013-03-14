@@ -1,3 +1,11 @@
+## 2013-03-14 4:06pm ##
+== Change ==
+Applied scheme to the User Space too
+== To Do ==
+Fix Selection 
+
+
+
 ## 2013-03-14 3:55pm ##
 == Change ==
 Added normalization to the data. 

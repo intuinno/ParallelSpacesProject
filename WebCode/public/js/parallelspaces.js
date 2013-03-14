@@ -12,8 +12,8 @@ $('#page1').live('pageinit', function() {
 		PSmax = event.target.value;
 	});
 
-	var w = 450;
-	var h = 450;
+	var w = 900;
+	var h = 900;
 	var margin = 20;
 
 	var ratings;
@@ -254,8 +254,13 @@ $('#page1').live('pageinit', function() {
 
 	});
 
-	var xScaleUser = d3.scale.linear().domain([0, 1]).range([margin, w-margin]);
-	var yScaleUser = d3.scale.linear().domain([0,1]).range([margin,w-margin]);
+	var xScaleUser = d3.scale.linear().range([margin, w-margin]);
+	var yScaleUser = d3.scale.linear().range([margin,w-margin]);
+	
+	var rUserScale = d3.scale.linear().range([minStarRadius, maxStarRadius]);
+	var fillUserScale = d3.scale.pow(4).range(["white", "darkblue"]);
+	
+	
 	
 	var xAxisUser = d3.svg.axis()
 						.scale(xScaleUser)
@@ -268,16 +273,17 @@ $('#page1').live('pageinit', function() {
 						.ticks(5);
 						
 	var zoomUser = d3.behavior.zoom()
-						// .x(xScaleUser)
-						// .y(yScaleUser)
+						.x(xScaleUser)
+						.y(yScaleUser)
 						.on("zoom", zoomedUser);
 						
 	var svgUser = d3.select("#userCanvas")
 					.append("svg")
-						.attr("height", "450px")
+						.attr("height", h)
 						.attr("viewBox", "0 0 " + w + " " +h)
 						.attr("title", "User Space")
 						.style("border", "1px solid silver")
+						.attr("transform", "translate(" + margin + "," + margin + ")")
 					.append("svg:g");
 					
 	var clip = svgUser.append("defs")
@@ -285,19 +291,18 @@ $('#page1').live('pageinit', function() {
 						.attr("id","userClip")
 						.append("svg:rect")
 						.attr("id","clip-rect")
-						.attr("x","0")
-						.attr("y","0")
+						.attr("x",margin)
+						.attr("y",margin)
 						.attr("width",w-2*margin)
 						.attr("height",h-2*margin);
 						
 	var svgUserBody = svgUser.append("g")
 							.attr("clip-path","url(#userClip)")
-							.attr("transform", "translate(" + margin + "," + margin + ")")
 							.call(zoomUser);
 							
 	var rect = svgUserBody.append("svg:rect")
-							.attr("width",w-2*margin)
-							.attr("height",h-2*margin)
+							.attr("width",w-margin)
+							.attr("height",h-margin)
 							.attr("fill","white");
 							
 	
@@ -319,6 +324,12 @@ $('#page1').live('pageinit', function() {
 	d3.csv("data/userSpaceNoNormal.csv", function(userCSV) {
 
 		userData = userCSV;
+		
+		//Set up Scales after reading data
+		
+		rUserScale.domain(d3.extent(userData, function(d){ return +d.numReview; }));
+		fillUserScale.domain(d3.extent(userData, function(d){ return +d.avgReview; }));
+		
 
 		svgUserGroup.selectAll("circle")
 					.data(userCSV, function(d) {
@@ -336,15 +347,12 @@ $('#page1').live('pageinit', function() {
 					})
 					.attr("r", function(d) {
 			//  console.log((d.numReview*5)*(d.numReview*10));
-						return (d.numReview * 10);
+						return rUserScale(+d.numReview);
 
 					})
 					.attr("fill", function(d) {
 							
-						return d3.hsl(userStarHue, d.avgReview, d.avgReview);
-					})
-					.attr("opacity", function(d) {
-						return d.avgReview;
+						return fillUserScale(+d.avgReview);
 					})
 					.on('click', function(d, i) {
 
