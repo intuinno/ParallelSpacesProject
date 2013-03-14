@@ -85,7 +85,7 @@ caxis([0 5])
 score(:,1) = scaledown(score(:,1));
 score(:,2) = scaledown(score(:,2));
 
-movieSpace = [score(:,1), score(:,2), scaledown(movieRatings(:,1)), scaledown(movieRatings(:,2))];
+movieSpace = [score(:,1), score(:,2), movieRatings(:,1), (movieRatings(:,2))];
 
 
 [wcoeff,score,latent,tsquared] = princomp(ratings);
@@ -102,10 +102,10 @@ caxis([0 5])
 score(:,1) = scaledown(score(:,1));
 score(:,2) = scaledown(score(:,2));
 
-userSpace = [score(:,1), score(:,2), scaledown(userRatings(:,1)), scaledown(userRatings(:,2))];
+userSpace = [score(:,1), score(:,2), (userRatings(:,1)), (userRatings(:,2))];
 
-json = savejson('movieSpace',movieSpace,'movieSpace.json');
-json = savejson('userSpace',userSpace,'userSpace.json');
+%json = savejson('movieSpace',movieSpace,'movieSpace.json');
+%json = savejson('userSpace',userSpace,'userSpace.json');
 
 csvwrite('movieSpace.csv',movieSpace);
 csvwrite('userSpace.csv',userSpace);
