@@ -551,7 +551,7 @@ $('#page1').live('pageinit', function() {
 			
 			switch (val) {
 				case 'sim1':
-					svgMovieGroup.selectAll(".selectedCircle, .star").transition()
+					svgMovieBody.selectAll(".selectedCircle, .star").transition()
 						.duration(3000)
 						.attr('cx', function (d) {
 						return x(+d.X)
@@ -559,14 +559,14 @@ $('#page1').live('pageinit', function() {
 					
 					break;
 				case 'avgReview':
-					svgMovieGroup.selectAll(".selectedCircle, .star").transition()
+					svgMovieBody.selectAll(".selectedCircle, .star").transition()
 						.duration(3000)
 						.attr('cx', function (d) {
 						return x(+d.avgReview)
 					});
 					break;
 				case 'numReview':
-					svgMovieGroup.selectAll(".selectedCircle, .star").transition()
+					svgMovieBody.selectAll(".selectedCircle, .star").transition()
 						.duration(3000)
 						.attr('cx', function (d) {
 						return x(+d.numReview)
@@ -592,7 +592,7 @@ $('#page1').live('pageinit', function() {
 							
 					zoomMovie.x(timeX);
 					
-					svgMovieGroup.selectAll(".selectedCircle, .star").transition()
+					svgMovieBody.selectAll(".selectedCircle, .star").transition()
 						.duration(1000)
 						.attr('cx', function (d) {
 						return timeX((timeFormat.parse(d.date)));

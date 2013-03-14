@@ -1,5 +1,12 @@
 ## 2013-03-14 4:06pm ##
 == Change ==
+Fix the bug when we change the axis, the selection marks does not follow. 
+== To Do ==
+When we change axis multiple times, it does not shows original scale
+
+
+## 2013-03-14 4:06pm ##
+== Change ==
 Fixed Selection
 == To Do ==
 Fix the bug when we change the axis, the selection marks does not follow. 
