@@ -213,7 +213,7 @@ $('#page1').live('pageinit', function() {
 											return y(+d.Y);
 										})
 										.attr("r", function(d) {
-											return (+d.numReview * 10 +2);
+											return rMovieScale(+d.numReview);
 										})
 										.classed(tempClass, true)
 										.classed("selectedCircle",true);
@@ -402,7 +402,7 @@ $('#page1').live('pageinit', function() {
 											return y(+d.Y);
 										})
 										.attr("r", function(d) {
-											return (+d.numReview * 10 +2);
+											return rUserScale(+d.numReview);
 										})
 										.classed(tempClass, true)
 										.classed("selectedCircle",true);

@@ -1,5 +1,14 @@
 ## 2013-03-14 4:06pm ##
 == Change ==
+Fixed Selection
+== To Do ==
+Fix the bug when we change the axis, the selection marks does not follow. 
+
+
+
+
+## 2013-03-14 4:06pm ##
+== Change ==
 Applied scheme to the User Space too
 == To Do ==
 Fix Selection 
