@@ -1,7 +1,11 @@
+
+
+
+## 2013-03-14 1:55pm ##
 == Change ==
-Fixed Time Scale bug - year 1938 is parsed as 2038
+Edited README.txt format
 == To Do ==
-Prepare data without normalization
+Fix movieSpace axis scale without normalization
 
 
 == Bug & Feature List ==
