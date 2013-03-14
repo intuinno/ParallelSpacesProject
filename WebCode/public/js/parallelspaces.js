@@ -41,8 +41,8 @@ $('#page1').live('pageinit', function() {
 	var ordinalColor = d3.scale.category10();
 
 	var movieVQnum = 0;
-	var maxStarRadius = 50;
-	var minStarRadius = 10;
+	var maxStarRadius = 10;
+	var minStarRadius = 2;
 
 	
 
@@ -51,6 +51,7 @@ $('#page1').live('pageinit', function() {
 	var y = d3.scale.linear().domain([0, 1]).range([ h - margin, margin]);
 	
 	var rMovieScale = d3.scale.linear().range([minStarRadius, maxStarRadius]);
+	var fillMovieScale = d3.scale.pow(4).range(["white", "darkblue"]);
 	
 	
 	var xAxis	= d3.svg.axis()
@@ -71,31 +72,32 @@ $('#page1').live('pageinit', function() {
 	
 	var svgMovie = d3.select("#movieCanvas")
 					.append("svg")
-						.attr("height", "450px")
+						.attr("height", h)
 						.attr("viewBox", "0 0 " + w + " " +h)
 						.attr("title", "Movie Space")
 						.style("border", "1px solid silver")
+						.attr("transform", "translate(" + margin + "," + margin + ")")
 					.append("svg:g");
-	//					.attr("transform", "translate(" + margin + "," + margin + ")");	
+						//.attr("transform", "translate(" + margin + "," + margin + ")");	
 						
 	var clip = svgMovie.append("defs")
 						.append("svg:clipPath")
 						.attr("id","movieClip")
 						.append("svg:rect")
 						.attr("id","clip-rect")
-						.attr("x","0")
-						.attr("y","0")
+						.attr("x",margin)
+						.attr("y",margin)
 						.attr("width",w-2*margin)
 						.attr("height",h-2*margin);
 						
 	var svgMovieBody = svgMovie.append("g")
 							.attr("clip-path","url(#movieClip)")
-							.attr("transform", "translate(" + margin + "," + margin + ")")
+						//	.attr("transform", "translate(" + margin + "," + margin + ")")
 							.call(zoomMovie);
 							
 	var rect = svgMovieBody.append("svg:rect")
-							.attr("width",w-2*margin)
-							.attr("height",h-2*margin)
+							.attr("width",w-margin)
+							.attr("height",h-margin)
 							.attr("fill","white");
 						
 						
@@ -136,6 +138,7 @@ $('#page1').live('pageinit', function() {
 		//Set up Scales after reading data
 		
 		rMovieScale.domain(d3.extent(movieData, function(d){ return +d.numReview; }));
+		fillMovieScale.domain(d3.extent(movieData, function(d){ return +d.avgReview; }));
 		
 
 		for (var count = 0; count < movieData.length; count++) {
@@ -160,10 +163,7 @@ $('#page1').live('pageinit', function() {
 						return rMovieScale(+d.numReview);
 					})
 					.attr("fill", function(d) {
-						return d3.hsl(movieStarHue, d.avgReview, d.avgReview);
-					})
-					.attr("opacity", function(d) {
-						return d.avgReview;
+						return fillMovieScale(+d.avgReview);
 					})
 					.on('click', function(d, i) {
 
