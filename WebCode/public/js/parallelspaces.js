@@ -50,6 +50,9 @@ $('#page1').live('pageinit', function() {
 		return x(+d.X);
 	}
  
+ 	var yValue = function (d) {
+		return y(+d.Y);
+	}
 	
 
 	var x = d3.scale.linear().domain([0, 1]).range([margin, w - margin]);
@@ -559,6 +562,8 @@ $('#page1').live('pageinit', function() {
 			switch (val) {
 				case 'sim1':
 				
+					x = d3.scale.linear().range([margin, w - margin]);
+
 					xDomainExtent = d3.extent(movieData, function(d){return +d.X;});
 															
 					xValue = function (d) {
@@ -569,6 +574,8 @@ $('#page1').live('pageinit', function() {
 					
 				case 'avgReview':
 				
+					x = d3.scale.linear().range([margin, w - margin]);
+
 					xDomainExtent = d3.extent(movieData, function(d){return +d.avgReview;});
 															
 					xValue = function (d) {
@@ -578,6 +585,8 @@ $('#page1').live('pageinit', function() {
 					break;
 					
 				case 'numReview':
+					
+					x = d3.scale.linear().range([margin, w - margin]);
 				
 					xDomainExtent = d3.extent(movieData, function(d){return +d.numReview;});
 															
@@ -627,9 +636,7 @@ $('#page1').live('pageinit', function() {
 			svgMovieBody.selectAll(".selectedCircle, .star").transition()
 				.duration(1000)
 				.attr('cx', xValue)
-				.attr("cy", function(d){ 
-					return y(+d.Y);
-			});		
+				.attr("cy", yValue);		
 					
 	});
 	
@@ -640,42 +647,82 @@ $('#page1').live('pageinit', function() {
 			
 			switch (val) {
 				case 'sim2':
-				svgMovieGroup.selectAll(".selectedCircle, .star").transition()
-							.duration(3000)
-						.attr('cy', function (d) {
-						return y(+d.Y)
-					});
+				
+					y = d3.scale.linear().range([ h - margin, margin]);
+
+					yDomainExtent = d3.extent(movieData, function(d){return +d.Y;});
+															
+					yValue = function (d) {
+						return y(+d.Y);
+					}
+												
 					break;
+					
 				case 'avgReview':
-					svgMovieGroup.selectAll(".selectedCircle, .star").transition()
-						.duration(3000)
-						.attr('cy', function (d) {
-						return y(+d.avgReview)
-					});
+				
+					y = d3.scale.linear().range([ h - margin, margin]);
+
+					yDomainExtent = d3.extent(movieData, function(d){return +d.avgReview;});
+															
+					yValue = function (d) {
+						return y(+d.avgReview);
+					}
+										
 					break;
+					
 				case 'numReview':
-					svgMovieGroup.selectAll(".selectedCircle, .star").transition()
-						.duration(3000)
-						.attr('cy', function (d) {
-						return y(+d.numReview)
-					});
+				
+					y = d3.scale.linear().range([ h - margin, margin]);
+
+					yDomainExtent = d3.extent(movieData, function(d){return +d.numReview;});
+															
+					yValue = function (d) {
+						return y(+d.numReview);
+					}
+										
 					break;
+															
 				case 'relDate':
 				
-					var timeFormat = d3.time.format("%e-%b-%y");
+					var timeFormat = d3.time.format("%e-%b-%Y");
 					
-					var minDate = d3.min(movieData, function(d){ return timeFormat.parse(d.date); });
-					var MaxDate = d3.max(movieData, function(d){ return timeFormat.parse(d.date); });
+					yDomainExtent = d3.extent(movieData, function(d){ return timeFormat.parse(d.date); });
+										
+					y = d3.time.scale().range([ h - margin, margin]);
 					
-					var timeX = d3.time.scale().domain([minDate, MaxDate]).range([margin, w - margin]);
-					
-					
-					svgMovieGroup.selectAll(".selectedCircle, .star").transition()
-						.attr('cy', function (d) {
-						return timeX((timeFormat.parse(d.date)));
-					});
+					yValue = function (d) {
+						return y((timeFormat.parse(d.date)));
+					}
+												
 					break;
+					
+					
 			}
+			
+			yAxis.scale(y);
+		
+			x.domain(xDomainExtent);
+		
+			y.domain(yDomainExtent);
+			
+			zoomMovie.x(x).y(y);
+													
+			svgMovieSelectionGroup.attr("transform", "scale(1)");
+			
+			svgMovieGroup.attr("transform", "scale(1)");
+
+			svgMovie.selectAll(".y.axis").transition()
+					.duration(1000)
+					.call(yAxis);
+			
+			svgMovie.selectAll(".x.axis").transition()
+					.duration(1000)
+					.call(xAxis);
+					
+			svgMovieBody.selectAll(".selectedCircle, .star").transition()
+				.duration(1000)
+				.attr('cx', xValue)
+				.attr("cy", yValue);		
 	});
 	
 	

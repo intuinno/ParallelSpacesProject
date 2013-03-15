@@ -1,3 +1,11 @@
+## 2013-03-15 1:14pm ##
+== Change ==
+Apply change to the movie space Y axis 
+== To Do ==
+Fix selection bug.  When I choose it in the movie space, the selection in the user space does not shows correctly.
+
+
+
 ## 2013-03-14 4:06pm ##
 == Change ==
 When we change axis multiple times, it does not shows original scale
