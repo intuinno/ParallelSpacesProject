@@ -809,14 +809,26 @@ $('#page1').live('pageinit', function() {
 										
 					break;
 					
-				case 'sex':
+				case 'gender':
 					
-					xScaleUser = d3.scale.ordinal().range([margin, w - margin]);
+					xScaleUser = d3.scale.ordinal().rangePoints([margin, w - margin],1);
 
-					xDomainExtentUser = d3.extent(userData, function(d){return +d.sex;});
+					xDomainExtentUser = ['M','F'];
 															
 					xValueUser = function (d) {
-						return xScaleUser(+d.sex);
+						return xScaleUser(d.sex);
+					}
+										
+					break;
+					
+				case 'job':
+					
+					xScaleUser = d3.scale.ordinal().rangePoints([margin, w - margin],1);
+
+					xDomainExtentUser = jobList;
+															
+					xValueUser = function (d) {
+						return xScaleUser(d.job);
 					}
 										
 					break;
