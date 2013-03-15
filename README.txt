@@ -1,5 +1,15 @@
 ## 2013-03-14 4:06pm ##
 == Change ==
+When we change axis multiple times, it does not shows original scale
+Movie space X axis changes y scale also.
+== To Do ==
+Apply change to the movie space Y axis 
+
+
+
+
+## 2013-03-14 4:06pm ##
+== Change ==
 Fix the bug when we change the axis, the selection marks does not follow. 
 == To Do ==
 When we change axis multiple times, it does not shows original scale

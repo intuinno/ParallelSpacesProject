@@ -12,8 +12,8 @@ $('#page1').live('pageinit', function() {
 		PSmax = event.target.value;
 	});
 
-	var w = 900;
-	var h = 900;
+	var w = 600;
+	var h = 600;
 	var margin = 20;
 
 	var ratings;
@@ -43,7 +43,13 @@ $('#page1').live('pageinit', function() {
 	var movieVQnum = 0;
 	var maxStarRadius = 10;
 	var minStarRadius = 2;
-
+	var xDomainExtent = [0,1];
+	var yDomainExtent = [0,1];
+	
+	var xValue = function (d) {
+		return x(+d.X);
+	}
+ 
 	
 
 	var x = d3.scale.linear().domain([0, 1]).range([margin, w - margin]);
@@ -139,6 +145,7 @@ $('#page1').live('pageinit', function() {
 		
 		rMovieScale.domain(d3.extent(movieData, function(d){ return +d.numReview; }));
 		fillMovieScale.domain(d3.extent(movieData, function(d){ return +d.avgReview; }));
+		
 		
 
 		for (var count = 0; count < movieData.length; count++) {
@@ -551,54 +558,79 @@ $('#page1').live('pageinit', function() {
 			
 			switch (val) {
 				case 'sim1':
-					svgMovieBody.selectAll(".selectedCircle, .star").transition()
-						.duration(3000)
-						.attr('cx', function (d) {
-						return x(+d.X)
-					});
+				
+					xDomainExtent = d3.extent(movieData, function(d){return +d.X;});
+															
+					xValue = function (d) {
+						return x(+d.X);
+					}
+												
+					break;
 					
-					break;
 				case 'avgReview':
-					svgMovieBody.selectAll(".selectedCircle, .star").transition()
-						.duration(3000)
-						.attr('cx', function (d) {
-						return x(+d.avgReview)
-					});
+				
+					xDomainExtent = d3.extent(movieData, function(d){return +d.avgReview;});
+															
+					xValue = function (d) {
+						return x(+d.avgReview);
+					}
+										
 					break;
+					
 				case 'numReview':
-					svgMovieBody.selectAll(".selectedCircle, .star").transition()
-						.duration(3000)
-						.attr('cx', function (d) {
-						return x(+d.numReview)
-					});
+				
+					xDomainExtent = d3.extent(movieData, function(d){return +d.numReview;});
+															
+					xValue = function (d) {
+						return x(+d.numReview);
+					}
+										
 					break;
+															
 				case 'relDate':
 				
 					var timeFormat = d3.time.format("%e-%b-%Y");
 					
-					var minDate = d3.min(movieData, function(d){ return timeFormat.parse(d.date); });
-					var MaxDate = d3.max(movieData, function(d){ return timeFormat.parse(d.date); });
+					xDomainExtent = d3.extent(movieData, function(d){ return timeFormat.parse(d.date); });
+										
+					x = d3.time.scale().range([margin, w - margin]);
 					
-					var timeX = d3.time.scale().domain([minDate, MaxDate]).range([margin, w - margin]);
-					
-					xAxis.scale(timeX);
-						//			.orient("bottom")
-						//			.ticks(5);
-					
-					
-					svgMovie.selectAll(".x.axis").transition()
-							.duration(1000)
-							.call(xAxis);
-							
-					zoomMovie.x(timeX);
-					
-					svgMovieBody.selectAll(".selectedCircle, .star").transition()
-						.duration(1000)
-						.attr('cx', function (d) {
-						return timeX((timeFormat.parse(d.date)));
-					});
+					xValue = function (d) {
+						return x((timeFormat.parse(d.date)));
+					}
+												
 					break;
+					
+					
 			}
+			
+			xAxis.scale(x);
+		
+			x.domain(xDomainExtent);
+		
+			y.domain(yDomainExtent);
+			
+			zoomMovie.x(x).y(y);
+													
+			svgMovieSelectionGroup.attr("transform", "scale(1)");
+			
+			svgMovieGroup.attr("transform", "scale(1)");
+
+			svgMovie.selectAll(".y.axis").transition()
+					.duration(1000)
+					.call(yAxis);
+			
+			svgMovie.selectAll(".x.axis").transition()
+					.duration(1000)
+					.call(xAxis);
+					
+			svgMovieBody.selectAll(".selectedCircle, .star").transition()
+				.duration(1000)
+				.attr('cx', xValue)
+				.attr("cy", function(d){ 
+					return y(+d.Y);
+			});		
+					
 	});
 	
 	$('#movieYAxisMenu').on('change', function() {
