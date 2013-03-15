@@ -1,3 +1,12 @@
+## 2013-03-15 5:43pm ##
+== Change ==
+Fix radius bug.  The selection radius does not match original radius when zoomed. 
+== To Do ==
+Add ordinal scale for user like job
+
+
+
+
 ## 2013-03-15 5:27pm ##
 == Change ==
 Fix selection bug.  When I choose it in the movie space, the selection in the user space does not shows correctly.
