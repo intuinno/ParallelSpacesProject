@@ -15,6 +15,27 @@ $('#page1').live('pageinit', function() {
 	var w = 600;
 	var h = 600;
 	var margin = 20;
+	var jobList = ['administrator',
+    'artist',
+    'doctor',
+    'educator',
+    'engineer',
+    'entertainment',
+    'executive',
+    'healthcare',
+    'homemaker',
+    'lawyer',
+    'librarian',
+    'marketing',
+    'none',
+    'other',
+    'programmer',
+    'retired',
+    'salesman',
+    'scientist',
+    'student',
+    'technician',
+    'writer'];
 
 	var ratings;
 	var userData;
@@ -43,6 +64,8 @@ $('#page1').live('pageinit', function() {
 	var movieVQnum = 0;
 	var maxStarRadius = 10;
 	var minStarRadius = 2;
+	
+	//Scale variable for movie space
 	var xDomainExtent = [0,1];
 	var yDomainExtent = [0,1];
 	
@@ -53,11 +76,22 @@ $('#page1').live('pageinit', function() {
  	var yValue = function (d) {
 		return y(+d.Y);
 	}
+
+	//Scale variable for user space
+	var xDomainExtentUser = [0,1];
+	var yDomainExtentUser = [0,1];
 	
+	var xValueUser = function (d) {
+		return xScaleUser(+d.X);
+	}
+ 
+ 	var yValueUser = function (d) {
+		return yScaleUser(+d.Y);
+	}	
 
-	var x = d3.scale.linear().domain([0, 1]).range([margin, w - margin]);
+	var x = d3.scale.linear().range([margin, w - margin]);
 
-	var y = d3.scale.linear().domain([0, 1]).range([ h - margin, margin]);
+	var y = d3.scale.linear().range([ h - margin, margin]);
 	
 	var rMovieScale = d3.scale.linear().range([minStarRadius, maxStarRadius]);
 	var fillMovieScale = d3.scale.pow(4).range(["white", "darkblue"]);
@@ -163,12 +197,8 @@ $('#page1').live('pageinit', function() {
 					.append("svg:circle")
 					.classed("movieCircle", true)
 					.classed("star", true)
-					.attr("cx", function(d) {
-						return x(+d.X);
-					})
-					.attr("cy", function(d) {
-						return y(+d.Y);
-					})
+					.attr("cx", xValue)
+					.attr("cy", yValue)
 					.attr("r", function(d) {
 						return rMovieScale(+d.numReview);
 					})
@@ -209,6 +239,9 @@ $('#page1').live('pageinit', function() {
 									tempGalaxy.push(userData[count]);
 								}
 							}
+							
+							xScaleUser.domain(xDomainExtentUser);
+							yScaleUser.domain(yDomainExtentUser);
 			
 							svgUserSelectionGroup.selectAll("." + tempClass)
 										.data(tempGalaxy, function(d) {
@@ -217,10 +250,10 @@ $('#page1').live('pageinit', function() {
 										.enter()
 										.append("circle")
 										.attr("cx", function(d) {
-											return x(+d.X);
+											return xValueUser(d);
 										})
 										.attr("cy", function(d) {
-											return y(+d.Y);
+											return yValueUser(d);
 										})
 										.attr("r", function(d) {
 											return rMovieScale(+d.numReview);
@@ -265,12 +298,10 @@ $('#page1').live('pageinit', function() {
 	});
 
 	var xScaleUser = d3.scale.linear().range([margin, w-margin]);
-	var yScaleUser = d3.scale.linear().range([margin,w-margin]);
+	var yScaleUser = d3.scale.linear().range([h-margin,margin]);
 	
 	var rUserScale = d3.scale.linear().range([minStarRadius, maxStarRadius]);
 	var fillUserScale = d3.scale.pow(4).range(["white", "darkblue"]);
-	
-	
 	
 	var xAxisUser = d3.svg.axis()
 						.scale(xScaleUser)
@@ -349,12 +380,8 @@ $('#page1').live('pageinit', function() {
 					.append("circle")
 					.classed("userCircle", true)
 					.classed("star", true)
-					.attr("cx", function(d) {
-						return x(+d.X);
-					})
-					.attr("cy", function(d) {
-						return y(+d.Y);
-					})
+					.attr("cx", xValueUser)
+					.attr("cy", yValueUser)
 					.attr("r", function(d) {
 			//  console.log((d.numReview*5)*(d.numReview*10));
 						return rUserScale(+d.numReview);
@@ -399,6 +426,9 @@ $('#page1').live('pageinit', function() {
 								}
 							}
 			
+							x.domain(xDomainExtent);
+							y.domain(yDomainExtent);
+							
 							svgMovieSelectionGroup.selectAll("."+tempClass)
 										.data(tempGalaxy, function(d) {
 											return +d.index;
@@ -406,10 +436,10 @@ $('#page1').live('pageinit', function() {
 										.enter()
 										.append("circle")
 										.attr("cx", function(d) {
-											return x(+d.X);
+											return xValue(d);
 										})
 										.attr("cy", function(d) {
-											return y(+d.Y);
+											return yValue(d);
 										})
 										.attr("r", function(d) {
 											return rUserScale(+d.numReview);
@@ -725,7 +755,100 @@ $('#page1').live('pageinit', function() {
 				.attr("cy", yValue);		
 	});
 	
-	
+	$('#userXAxisMenu').on('change', function() {
+		
+		var $this = $(this),
+			val	= $this.val();
+			
+			switch (val) {
+				case 'sim1':
+				
+					xScaleUser = d3.scale.linear().range([margin, w - margin]);
+
+					xDomainExtentUser = d3.extent(userData, function(d){return +d.X;});
+															
+					xValueUser = function (d) {
+						return xScaleUser(+d.X);
+					}
+												
+					break;
+					
+				case 'avgReview':
+				
+					xScaleUser = d3.scale.linear().range([margin, w - margin]);
+
+					xDomainExtentUser = d3.extent(userData, function(d){return +d.avgReview;});
+															
+					xValueUser = function (d) {
+						return xScaleUser(+d.avgReview);
+					}
+										
+					break;
+					
+				case 'numReview':
+					
+					xScaleUser = d3.scale.linear().range([margin, w - margin]);
+
+					xDomainExtentUser = d3.extent(userData, function(d){return +d.numReview;});
+															
+					xValueUser = function (d) {
+						return xScaleUser(+d.numReview);
+					}
+										
+					break;
+															
+				case 'age':
+					
+					xScaleUser = d3.scale.linear().range([margin, w - margin]);
+
+					xDomainExtentUser = d3.extent(userData, function(d){return +d.age;});
+															
+					xValueUser = function (d) {
+						return xScaleUser(+d.age);
+					}
+										
+					break;
+					
+				case 'sex':
+					
+					xScaleUser = d3.scale.ordinal().range([margin, w - margin]);
+
+					xDomainExtentUser = d3.extent(userData, function(d){return +d.sex;});
+															
+					xValueUser = function (d) {
+						return xScaleUser(+d.sex);
+					}
+										
+					break;
+					
+			}
+			
+			xAxisUser.scale(xScaleUser);
+		
+			xScaleUser.domain(xDomainExtentUser);
+		
+			yScaleUser.domain(yDomainExtentUser);
+			
+			zoomUser.x(xScaleUser).y(yScaleUser);
+													
+			svgUserSelectionGroup.attr("transform", "scale(1)");
+			
+			svgUserGroup.attr("transform", "scale(1)");
+
+			svgUser.selectAll(".y.axis").transition()
+					.duration(1000)
+					.call(yAxisUser);
+			
+			svgUser.selectAll(".x.axis").transition()
+					.duration(1000)
+					.call(xAxisUser);
+					
+			svgUserBody.selectAll(".selectedCircle, .star").transition()
+				.duration(1000)
+				.attr('cx', xValueUser)
+				.attr("cy", yValueUser);		
+					
+	});
 
 	
 

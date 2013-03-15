@@ -1,3 +1,12 @@
+## 2013-03-15 5:27pm ##
+== Change ==
+Fix selection bug.  When I choose it in the movie space, the selection in the user space does not shows correctly.
+== To Do ==
+Fix radiation bug.  The selection radius does not match original radius when zoomed. 
+
+
+
+
 ## 2013-03-15 1:14pm ##
 == Change ==
 Apply change to the movie space Y axis 
