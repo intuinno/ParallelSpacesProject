@@ -1,3 +1,12 @@
+## 2013-03-15 10:39pm ##
+== Change ==
+Add location display
+== To Do ==
+Fix location bug
+
+
+
+
 ## 2013-03-15 8:43pm ##
 == Change ==
 Add ordinal scale for user like job
@@ -86,6 +95,6 @@ Reset not implemented
 Brushing
 Bubble selection
 -Density based contour plot
--Density & magnitude based contour plot
+-Density & magnitude based cont
 Add a zoom for ordinal scale 
 

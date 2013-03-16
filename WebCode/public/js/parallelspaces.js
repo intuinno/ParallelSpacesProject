@@ -77,6 +77,11 @@ $('#page1').live('pageinit', function() {
 		return y(+d.Y);
 	}
 
+	//variables for Geo mapping
+	var proj = d3.geo.albersUsa();
+	var path = d3.geo.path().projection(proj);
+
+
 	//Scale variable for user space
 	var xDomainExtentUser = [0,1];
 	var yDomainExtentUser = [0,1];
@@ -833,6 +838,16 @@ $('#page1').live('pageinit', function() {
 										
 					break;
 					
+				case 'location':
+				
+					queue()
+    					.defer(d3.json, "data/us-states.geojson")
+    					.defer(d3.tsv, "data/zips.tsv")
+    					.await(render);
+    					
+															
+					break;
+					
 			}
 			
 			xAxisUser.scale(xScaleUser);
@@ -862,7 +877,54 @@ $('#page1').live('pageinit', function() {
 					
 	});
 
-	
+	function render(error, states, zips) {
+		
+		svgUserSelectionGroup.append("g").attr("id","states");
+					
+		d3.select("#states").selectAll("path")
+				.data(states.features)
+			.enter().append("path")
+				.attr("d",path);
+		var zipCode = "00210";
+		zips.filter(function(d) {return d.zip == zipCode;});
+		
+		xValueUser = function (d) {
+			
+						var temp = zips.filter(function(el) {return el.zip == d.zip});
+						var temp2 = [{lon:"43",lat:"-71"}];
+						if (temp.length < 1) {
+							temp = temp2;
+						}
+						var p = proj([temp[0].lon, temp[0].lat]);
+						
+						return p[0];
+					}
+					
+		yValueUser = function (d) {
+			var temp = zips.filter(function(el) {return el.zip == d.zip});
+						
+						var temp = zips.filter(function(el) {return el.zip == d.zip});
+						var temp2 = [{lon:"43",lat:"-71"}];
+						if (temp.length < 1) {
+							temp = temp2;
+						}
+						var p = proj([temp[0].lon, temp[0].lat]);
+						
+						return p[1];
+		}
+										
+							
+					
+		svgUserBody.selectAll(".selectedCircle, .star").transition()
+				.duration(1000)
+				.attr('cx', xValueUser)
+				.attr("cy", yValueUser);	
+		
+						
+				
+		
+				
+	}
 
 });
 
