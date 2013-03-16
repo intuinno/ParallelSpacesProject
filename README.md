@@ -1,3 +1,11 @@
+## 2013-03-15 8:43pm ##
+== Change ==
+Add ordinal scale for user like job
+== To Do ==
+Add location display
+
+
+
 ## 2013-03-15 5:43pm ##
 == Change ==
 Fix radius bug.  The selection radius does not match original radius when zoomed. 
@@ -74,8 +82,10 @@ Fix movieSpace axis scale without normalization
 
 
 == Bug & Feature List ==
-User space axis variation not yet implemented
 Reset not implemented
 Brushing
 Bubble selection
+-Density based contour plot
+-Density & magnitude based contour plot
+Add a zoom for ordinal scale 
 
