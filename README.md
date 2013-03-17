@@ -1,8 +1,15 @@
+## 2013-03-17 12:04pm ##
+== Change ==
+Fix location bug - when user space is changed to location, and then changes back to similarity, it breaks. 
+== To Do ==
+Add contour plot
+
+
 ## 2013-03-15 10:39pm ##
 == Change ==
 Add location display
 == To Do ==
-Fix location bug
+Fix location bug - when user space is changed to location, and then changes back to similarity, it breaks. 
 
 
 

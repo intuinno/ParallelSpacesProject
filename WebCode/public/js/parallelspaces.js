@@ -80,6 +80,9 @@ $('#page1').live('pageinit', function() {
 	//variables for Geo mapping
 	var proj = d3.geo.albersUsa();
 	var path = d3.geo.path().projection(proj);
+	var wasLocation = false;
+	var wasYAxisUser, wasYValueUser,wasYScaleUser; 
+	var myStates, myZip=[];
 
 
 	//Scale variable for user space
@@ -176,6 +179,12 @@ $('#page1').live('pageinit', function() {
 		ratings = ratingsCSV;
 		userLength = ratings.length;
 		movieLength = d3.keys(ratings[0]).length;
+
+	})
+	
+	d3.json("data/us-states.geojson", function(states) {
+
+		myStates = states;
 
 	})
 
@@ -765,16 +774,76 @@ $('#page1').live('pageinit', function() {
 		var $this = $(this),
 			val	= $this.val();
 			
-			switch (val) {
+			if(val === 'location') {
+    					
+    			wasLocation = true;
+    			
+    			$('#userYAxisMenu').selectmenu('disable');
+    			
+				wasYAxisUser = yAxisUser;
+				wasYValueUser = yValueUser;
+				wasYScaleUser = yScaleUser;
+		
+				var locationGroup = svgUserSelectionGroup.append("g").attr("id","states");
+		
+		
+				d3.select("#states").selectAll("path")
+						.data(myStates.features)
+					.enter().append("path")
+						.attr("d",path);
+		
+				xValueUser = function (d) {
+					
+								var p = proj([d.lon, d.lat]);
+								
+								return p[0];
+							}
+							
+				yValueUser = function (d) {
+		
+								var p = proj([d.lon, d.lat]);
+								
+								return p[1];
+				}
+												
+												
+				svgUserBody.selectAll(".selectedCircle, .star").transition()
+						.duration(1000)
+						.attr('cx', xValueUser)
+						.attr("cy", yValueUser);	
+						
+			} else {
+				
+				if(wasLocation === true) {
+					
+					$('#userYAxisMenu').selectmenu('enable');
+				
+					wasLocation = false;	
+					
+					yScaleUser = wasYScaleUser;
+					yAxisUser = wasYAxisUser;
+					yValueUser  = wasYValueUser;
+					
+					d3.select("#states").remove();
+					
+				}
+				
+				
+				switch (val) {
+				
 				case 'sim1':
+				
+					
 				
 					xScaleUser = d3.scale.linear().range([margin, w - margin]);
 
+					
 					xDomainExtentUser = d3.extent(userData, function(d){return +d.X;});
 															
 					xValueUser = function (d) {
 						return xScaleUser(+d.X);
 					}
+					
 												
 					break;
 					
@@ -787,6 +856,7 @@ $('#page1').live('pageinit', function() {
 					xValueUser = function (d) {
 						return xScaleUser(+d.avgReview);
 					}
+					
 										
 					break;
 					
@@ -799,7 +869,8 @@ $('#page1').live('pageinit', function() {
 					xValueUser = function (d) {
 						return xScaleUser(+d.numReview);
 					}
-										
+					
+					
 					break;
 															
 				case 'age':
@@ -811,6 +882,7 @@ $('#page1').live('pageinit', function() {
 					xValueUser = function (d) {
 						return xScaleUser(+d.age);
 					}
+					
 										
 					break;
 					
@@ -823,7 +895,9 @@ $('#page1').live('pageinit', function() {
 					xValueUser = function (d) {
 						return xScaleUser(d.sex);
 					}
-										
+							
+					drawNewXAxisUser();
+								
 					break;
 					
 				case 'job':
@@ -835,17 +909,8 @@ $('#page1').live('pageinit', function() {
 					xValueUser = function (d) {
 						return xScaleUser(d.job);
 					}
-										
-					break;
 					
-				case 'location':
-				
-					queue()
-    					.defer(d3.json, "data/us-states.geojson")
-    					.defer(d3.tsv, "data/zips.tsv")
-    					.await(render);
-    					
-															
+										
 					break;
 					
 			}
@@ -873,58 +938,15 @@ $('#page1').live('pageinit', function() {
 			svgUserBody.selectAll(".selectedCircle, .star").transition()
 				.duration(1000)
 				.attr('cx', xValueUser)
-				.attr("cy", yValueUser);		
-					
+				.attr("cy", yValueUser);	
+				
+			}
+						
 	});
 
-	function render(error, states, zips) {
-		
-		svgUserSelectionGroup.append("g").attr("id","states");
-					
-		d3.select("#states").selectAll("path")
-				.data(states.features)
-			.enter().append("path")
-				.attr("d",path);
-		var zipCode = "00210";
-		zips.filter(function(d) {return d.zip == zipCode;});
-		
-		xValueUser = function (d) {
+
 			
-						var temp = zips.filter(function(el) {return el.zip == d.zip});
-						var temp2 = [{lon:"43",lat:"-71"}];
-						if (temp.length < 1) {
-							temp = temp2;
-						}
-						var p = proj([temp[0].lon, temp[0].lat]);
-						
-						return p[0];
-					}
-					
-		yValueUser = function (d) {
-			var temp = zips.filter(function(el) {return el.zip == d.zip});
-						
-						var temp = zips.filter(function(el) {return el.zip == d.zip});
-						var temp2 = [{lon:"43",lat:"-71"}];
-						if (temp.length < 1) {
-							temp = temp2;
-						}
-						var p = proj([temp[0].lon, temp[0].lat]);
-						
-						return p[1];
-		}
-										
-							
-					
-		svgUserBody.selectAll(".selectedCircle, .star").transition()
-				.duration(1000)
-				.attr('cx', xValueUser)
-				.attr("cy", yValueUser);	
-		
-						
-				
-		
-				
-	}
+	
 
 });
 
