@@ -85,6 +85,7 @@ $('#page1').live('pageinit', function() {
 	var myStates, myZip=[];
 	var contourMovie =[];
 	var contourUser =[];
+	var colourCategory =[];
 
 
 	//Scale variable for user space
@@ -508,21 +509,41 @@ $('#page1').live('pageinit', function() {
                                   ys = d3.range(-0.1, 1.1,0.1),
                                   zs = d3.range(min, max, (max-min)/10),
                                   xContour = d3.scale.linear().range(x.range()).domain([0.1,0.9]),
-                                  yContour = d3.scale.linear().range(y.range()).domain([0.1,0.9]),
-                                  colours = d3.scale.linear().domain([min,max]).range(["#fff", "red"]);
-                        
+                                  yContour = d3.scale.linear().range(y.range()).domain([0.1,0.9]);
+                                  
+                               var categorycolor = d3.scale.category10();
+                               
+                             
                               c.contour(data2D, 0, xs.length-1, 0, ys.length-1, xs, ys, zs.length, zs);
                                 
                                 contourMovie.push(c.contourList());
                                 
-                              svgMovieContourGroup.selectAll("path")
-                                                .data(c.contourList())
-                                                .enter().append("svg:path")
-                                                  .style("fill",function(d) { return colours(d.level);})
-                                                  .style("stroke","black")
-                                                  .attr("d",d3.svg.line()
-                                                    .x(function(d) { return xContour(d.y); })
-                                                    .y(function(d) { return yContour(d.x); })
+                                for(var j=0;j<10;j++)
+                                colourCategory[j] = d3.scale.linear().domain([min,max]).range(["#fff", categorycolor(j)]);
+                                
+                              svgMovieContourGroup.selectAll("g")
+                                                    .data(contourMovie)
+                                                    .enter().append("g")
+                                                    .each( function(d,i) {
+                                                        
+                                                       
+                                                       
+                                                       var f = i;
+                        
+                                                        d3.select(this)
+                                                            .selectAll("path")
+                                                            .data(d)
+                                                            .enter().append("path")
+                                                            .style("fill",function(d) { 
+                                                                
+                                                                return colourCategory[f](d.level);})
+                                                            .style("stroke","black")
+                                                            .style("opacity",0.2)
+                                                            .attr("d",d3.svg.line()
+                                                                .x(function(d) { return xContour(d.y); })
+                                                                .y(function(d) { return yContour(d.x); }));
+                                                                
+                                                            }
                                                   );
                 							
 							
