@@ -984,7 +984,7 @@ $('#page1').live('pageinit', function() {
 						return xScaleUser(d.sex);
 					}
 							
-					drawNewXAxisUser();
+					
 								
 					break;
 					
@@ -1032,9 +1032,130 @@ $('#page1').live('pageinit', function() {
 						
 	});
 
+    $('#userYAxisMenu').on('change', function() {
+        
+        var $this = $(this),
+            val = $this.val();
+            
+           
+               
+                
+                switch (val) {
+                
+                case 'sim2':
+                
+                    
+                
+                    yScaleUser = d3.scale.linear().range([h-margin, margin]);
+
+                    
+                    yDomainExtentUser = d3.extent(userData, function(d){return +d.Y;});
+                                                            
+                    yValueUser = function (d) {
+                        return yScaleUser(+d.Y);
+                    }
+                    
+                                                
+                    break;
+                    
+                case 'avgReview':
+                
+                    yScaleUser = d3.scale.linear().range([h-margin, margin]);
+
+                    yDomainExtentUser = d3.extent(userData, function(d){return +d.avgReview;});
+                                                            
+                    yValueUser = function (d) {
+                        return yScaleUser(+d.avgReview);
+                    }
+                    
+                                        
+                    break;
+                    
+                case 'numReview':
+                    
+                    yScaleUser = d3.scale.linear().range([h-margin, margin]);
+
+                    yDomainExtentUser = d3.extent(userData, function(d){return +d.numReview;});
+                                                            
+                    yValueUser = function (d) {
+                        return yScaleUser(+d.numReview);
+                    }
+                    
+                    
+                    break;
+                                                            
+                case 'age':
+                    
+                    yScaleUser = d3.scale.linear().range([h-margin, margin]);
+
+                    yDomainExtentUser = d3.extent(userData, function(d){return +d.age;});
+                                                            
+                    yValueUser = function (d) {
+                        return yScaleUser(+d.age);
+                    }
+                    
+                                        
+                    break;
+                    
+                case 'gender':
+                    
+                    yScaleUser = d3.scale.ordinal().rangePoints([h-margin, margin],1);
+
+                    yDomainExtentUser = ['M','F'];
+                                                            
+                    yValueUser = function (d) {
+                        return yScaleUser(d.sex);
+                    }
+                            
+                   
+                                
+                    break;
+                    
+                case 'job':
+                    
+                    yScaleUser = d3.scale.ordinal().rangePoints([h-margin, margin],1);
+
+                    yDomainExtentUser = jobList;
+                                                            
+                    yValueUser = function (d) {
+                        return yScaleUser(d.job);
+                    }
+                    
+                                        
+                    break;
+                    
+            }
+            
+            yAxisUser.scale(yScaleUser);
+        
+            yScaleUser.domain(yDomainExtentUser);
+        
+            xScaleUser.domain(xDomainExtentUser);
+            
+            zoomUser.x(xScaleUser).y(yScaleUser);
+                                                    
+            svgUserSelectionGroup.attr("transform", "scale(1)");
+            
+            svgUserGroup.attr("transform", "scale(1)");
+
+            svgUser.selectAll(".y.axis").transition()
+                    .duration(1000)
+                    .call(yAxisUser);
+            
+            svgUser.selectAll(".x.axis").transition()
+                    .duration(1000)
+                    .call(xAxisUser);
+                    
+            svgUserBody.selectAll(".selectedCircle, .star").transition()
+                .duration(1000)
+                .attr('cx', xValueUser)
+                .attr("cy", yValueUser);    
+                
+            
+                        
+    });
 
 			
 	
 
 });
-

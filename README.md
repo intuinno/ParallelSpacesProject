@@ -1,9 +1,22 @@
+## 2013-03-27 6:49pm ##
+### Change 
+The User Y axis change properly now.
+### To Do 
+Fix x, y change bug in the KDE2D
+Add a support for the multiple axis of contour. 
+Add a check button to enable density mode vs amplitude mode
+Fix search bar
+Fix selection double slider
+Add a check button to enable group mode contour plot to show negative plot
+
+
 ## 2013-03-27 12:31pm ##
 ### Change 
 Add a support for the Multiple contour with class colors
 ### To Do 
 Fix x, y change bug in the KDE2D
 Add a support for the multiple axis of contour. 
+The User Y axis does not change. 
 
 
 ## 2013-03-27 12:31pm ##
