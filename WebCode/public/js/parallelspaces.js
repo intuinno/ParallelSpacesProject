@@ -83,6 +83,8 @@ $('#page1').live('pageinit', function() {
 	var wasLocation = false;
 	var wasYAxisUser, wasYValueUser,wasYScaleUser; 
 	var myStates, myZip=[];
+	var contourMovie =[];
+	var contourUser =[];
 
 
 	//Scale variable for user space
@@ -154,9 +156,14 @@ $('#page1').live('pageinit', function() {
 						
 						
 
+    var svgMovieContourGroup = svgMovieBody.append("svg:g").attr('class','movieContourGroup');
+    
 	var svgMovieSelectionGroup = svgMovieBody.append("svg:g").attr('class', 'movieSelectionSVGGroup');
 
 	var svgMovieGroup = svgMovieBody.append("svg:g").attr('class', 'movieSVGGroup');
+	
+	
+	
 	// var brush = d3.svg.brush() 
 					// .x(x)
 					// .y(y)
@@ -276,6 +283,8 @@ $('#page1').live('pageinit', function() {
 										.classed("selectedCircle",true);
 			
 							this.classList.add(tempClass);
+							
+							
 			
 						} else {
 							
@@ -462,6 +471,62 @@ $('#page1').live('pageinit', function() {
 										.classed("selectedCircle",true);
 			
 							this.classList.add(tempClass);
+							
+							var tempDataX = tempGalaxy.map(function(d) {
+							    return +d.X;
+							});
+							
+							var tempDataY = tempGalaxy.map(function(d) {
+							    return +d.Y;
+							});
+							
+							var tempDataZ = tempGalaxy.map(function (d){ 
+							    return +d.avgReview;
+							    
+							});
+							
+							var data2D = science.stats.kde2D(tempDataX, tempDataY, tempDataZ, d3.range(0,1,0.1),d3.range(0,1,0.1), 0.05,0.05);
+							
+							var max = d3.max(data2D,function(d){return d3.max(d);});
+							var min = d3.min(data2D,function(d){return d3.min(d);});
+
+
+                            var cliff = -1000;
+                        
+                                
+                              data2D.push(d3.range(data2D[0].length).map(function() { return cliff; }));
+                              data2D.unshift(d3.range(data2D[0].length).map(function() { return cliff; }));
+                              data2D.forEach(function(d) {
+                                d.push(cliff);
+                                d.unshift(cliff);
+                              });
+                              
+                        
+                                                      
+                              var c = new Conrec(),
+                                  xs = d3.range(-0.1, 1.1,0.1),
+                                  ys = d3.range(-0.1, 1.1,0.1),
+                                  zs = d3.range(min, max, (max-min)/10),
+                                  xContour = d3.scale.linear().range(x.range()).domain([0.1,0.9]),
+                                  yContour = d3.scale.linear().range(y.range()).domain([0.1,0.9]),
+                                  colours = d3.scale.linear().domain([min,max]).range(["#fff", "red"]);
+                        
+                              c.contour(data2D, 0, xs.length-1, 0, ys.length-1, xs, ys, zs.length, zs);
+                                
+                                contourMovie.push(c.contourList());
+                                
+                              svgMovieContourGroup.selectAll("path")
+                                                .data(c.contourList())
+                                                .enter().append("svg:path")
+                                                  .style("fill",function(d) { return colours(d.level);})
+                                                  .style("stroke","black")
+                                                  .attr("d",d3.svg.line()
+                                                    .x(function(d) { return xContour(d.y); })
+                                                    .y(function(d) { return yContour(d.x); })
+                                                  );
+                							
+							
+						
 			
 						} else {
 							
@@ -502,8 +567,10 @@ $('#page1').live('pageinit', function() {
 	})
 	function zoomedMovie() {
 // 
+		svgMovieContourGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		svgMovieSelectionGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		svgMovieGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+		
 		svgMovie.select(".x.axis").call(xAxis);
 		svgMovie.select(".y.axis").call(yAxis);
 	}

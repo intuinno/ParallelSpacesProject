@@ -1,3 +1,12 @@
+## 2013-03-27 12:31pm ##
+### Change 
+Add contour plot
+### To Do 
+Fix x, y change bug in the KDE2D
+Add a support for the Multiple contour with class colors
+Add a support for the multiple axis of contour. 
+
+
 ## 2013-03-17 12:04pm ##
 ### Change 
 Fix location bug - when user space is changed to location, and then changes back to similarity, it breaks. 
