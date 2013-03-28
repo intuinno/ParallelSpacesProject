@@ -36,8 +36,16 @@ $('#page1').live('pageinit', function() {
     'student',
     'technician',
     'writer'];
-
-    var numStepForKDE = 10;
+    
+    var selectedGalaxyMovie =[];
+    var selectedGalaxyUser =[];
+    var selectedGalaxyContourMovie =[];
+    var selectedGalaxyContourUser =[];
+    var selectedGalaxyIndexUser =[];
+    var selectedGalaxyIndexMovie =[];
+    
+    var numStepForKDE = 20;
+    var numLevelForContour = 10;
 	var ratings;
 	var userData;
 	var movieData;
@@ -472,81 +480,17 @@ $('#page1').live('pageinit', function() {
 										})
 										.classed(tempClass, true)
 										.classed("selectedCircle",true);
-			
+										
 							this.classList.add(tempClass);
+                            
 							
-							var tempDataX = tempGalaxy.map(function(d) {
-							    return xValue(d);
-							});
+							selectedGalaxyMovie.push(tempGalaxy); 
+							selectedGalaxyIndexUser.push(i);
 							
-							var tempDataY = tempGalaxy.map(function(d) {
-							    return yValue(d);
-							});
-							
-							var tempDataZ = tempGalaxy.map(function (d){ 
-							    return ratings[i][d.index];
-							    
-							});
-							
-							numStepForKDE = 40;
-							
-							var XStep = (x.range()[1]-x.range()[0])/numStepForKDE ;
-							var YStep = (y.range()[1]-y.range()[0])/numStepForKDE ;
-							
-							var XCoord = d3.range(x.range()[0], x.range()[1]+XStep, XStep);
-							var YCoord = d3.range(y.range()[0], y.range()[1]+YStep, YStep);
+							updateContourMovie();
+			
 							
 							
-							var data2D = science.stats.kde2D(tempDataX, tempDataY, tempDataZ, XCoord, YCoord, XStep/1, YStep/1 );
-							
-							var max = d3.max(data2D,function(d){return d3.max(d);});
-							var min = d3.min(data2D,function(d){return d3.min(d);});
-
-
-                             // var cliff = -1000;
-//                              
-                               // data2D.push(d3.range(data2D[0].length).map(function() { return cliff; }));
-                               // data2D.unshift(d3.range(data2D[0].length).map(function() { return cliff; }));
-                               // data2D.forEach(function(d) {
-                               // d.push(cliff);
-                               // d.unshift(cliff);
-                               // });
-//                                                       
-                              var c = new Conrec(),
-                                  zs = d3.range(min, max, (max-min)/10);
-                                  
-                               var categorycolor = d3.scale.category10();
-                               
-                             
-                              c.contour(data2D, 0, XCoord.length-1, 0, YCoord.length-1, XCoord, YCoord, zs.length, zs);
-                                
-                                contourMovie.push(c.contourList());
-                                
-                                for(var j=0;j<10;j++)
-                                colourCategory[j] = d3.scale.linear().domain([min,max]).range(["#fff", categorycolor(j)]);
-                                
-                              svgMovieContourGroup.selectAll("g")
-                                                    .data(contourMovie)
-                                                    .enter().append("g")
-                                                    .each( function(d,i) {
-                                                       
-                                                       var f = i;
-                        
-                                                        d3.select(this)
-                                                            .selectAll("path")
-                                                            .data(d)
-                                                            .enter().append("path")
-                                                            .style("fill",function(d) { 
-                                                                
-                                                                return colourCategory[f](d.level);})
-                                                            .style("stroke","black")
-                                                            .style("opacity",0.7)
-                                                            .attr("d",d3.svg.line()
-                                                                .x(function(d) { return +(d.x); })
-                                                                .y(function(d) { return +(d.y); }));
-                                                                
-                                                            }
-                                                  );
 			
 						} else {
 							
@@ -751,6 +695,8 @@ $('#page1').live('pageinit', function() {
 			y.domain(yDomainExtent);
 			
 			zoomMovie.x(x).y(y);
+			
+			svgMovieContourGroup.attr("transform","scale(1)");
 													
 			svgMovieSelectionGroup.attr("transform", "scale(1)");
 			
@@ -767,9 +713,148 @@ $('#page1').live('pageinit', function() {
 			svgMovieBody.selectAll(".selectedCircle, .star").transition()
 				.duration(1000)
 				.attr('cx', xValue)
-				.attr("cy", yValue);		
+				.attr("cy", yValue);	
+				
+			updateContourMovie();	
 					
 	});
+	
+	
+    function updateContourMovie() {
+                
+        var min=100, max=-100;
+        
+        var selectedData2D=[];
+       
+            var XStep = (x.range()[1] - x.range()[0]) / numStepForKDE;
+            var YStep = (y.range()[1] - y.range()[0]) / numStepForKDE;
+
+            var XCoord = d3.range(x.range()[0]-3*XStep, x.range()[1] + 3*XStep, XStep);
+            var YCoord = d3.range(y.range()[0]-3*YStep, y.range()[1] + 3*YStep, YStep);
+            
+        selectedData2D = selectedGalaxyMovie.map(function(tempGalaxy, i) {
+
+            var tempDataX = tempGalaxy.map(function(d) {
+                return xValue(d);
+            });
+
+            var tempDataY = tempGalaxy.map(function(d) {
+                return yValue(d);
+            });
+
+            var tempDataZ = tempGalaxy.map(function(d) {
+                return ratings[selectedGalaxyIndexUser[i]][d.index];
+            });
+
+
+
+            var data2D = science.stats.kde2D(tempDataX, tempDataY, tempDataZ, XCoord, YCoord, XStep / 1, YStep / 1);
+            
+            var minTemp = d3.min(data2D, function(d) { return d3.min(d);});
+            var maxTemp = d3.max(data2D, function (d) { return d3.max(d);});
+            
+            if (minTemp < min) {
+                
+                min = minTemp;
+                
+            }
+            
+            
+            if (maxTemp > max) {
+                
+                max = maxTemp;
+                
+            } 
+            
+            return data2D;
+            
+        });
+        
+         selectedGalaxyContourMovie = selectedData2D.map(function (data2D,i) {
+             
+            var c = new Conrec(), zs = d3.range(min, max, (max - min) / numLevelForContour);
+
+            c.contour(data2D, 0, XCoord.length - 1, 0, YCoord.length - 1, XCoord, YCoord, zs.length, zs);
+
+            return c.contourList();
+
+        });
+
+       
+        var categorycolor = d3.scale.category10();
+        for (var j = 0; j < 10; j++)
+            colourCategory[j] = d3.scale.linear().domain([min, max]).range(["#fff", categorycolor(j)]);
+
+        
+        svgMovieContourGroup.selectAll("g")
+                        .data(selectedGalaxyContourMovie)
+                        .each(function(d, i) {
+
+                            var f = i;
+
+
+                            var paths =   d3.select(this)
+                                .selectAll("path")
+                                .data(d);
+                                
+                           paths.transition().duration(1000)
+                                .style("fill", function(d) {
+
+                                    return colourCategory[f](d.level);
+                                })
+                                .style("stroke", "black")
+                                .style("opacity", 0.7)
+                                .attr("d", d3.svg.line().x(function(d) {
+                                    return +(d.x);
+                                }).y(function(d) {
+                                    return +(d.y);
+                                }));
+                                
+                                
+                           paths.enter()
+                                .append("path").transition().duration(1000)
+                                .style("fill", function(d) {
+
+                                    return colourCategory[f](d.level);
+                                })
+                                .style("stroke", "black")
+                                .style("opacity", 0.7)                                
+                                .attr("d", d3.svg.line().x(function(d) {
+                                    return +(d.x);
+                                }).y(function(d) {
+                                    return +(d.y);
+                                }));
+                                
+                               paths.exit()
+                                .remove();
+
+                        })
+                        .enter().append("g")
+                        .each(function(d, i) {
+
+                            var f = i;
+
+                            d3.select(this)
+                                .selectAll("path")
+                                .data(d)
+                                .enter()
+                                .append("path")
+                                .style("fill", function(d) {
+
+                                    return colourCategory[f](d.level);
+                                })
+                                .style("stroke", "black")
+                                .style("opacity", 0.7)
+                                .attr("d", d3.svg.line().x(function(d) {
+                                    return +(d.x);
+                                }).y(function(d) {
+                                    return +(d.y);
+                                }));
+
+                        });
+        
+    }
+
 	
 	$('#movieYAxisMenu').on('change', function() {
 		

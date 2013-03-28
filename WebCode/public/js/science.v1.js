@@ -1168,7 +1168,7 @@ science.stats.kde2D = function( XData, YData, ZData, XCoord, YCoord, XBandwidth,
     
     for (i=0; i<XCoord.length; i++) {
         
-        console.log(i);
+        //console.log(i);
         
         var xPoints=[];
         
