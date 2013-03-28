@@ -1,7 +1,19 @@
 ## 2013-03-28 5:25pm ##
 ### Change 
+Fix release date axis
+### To Do 
+Add a check button to enable density mode vs amplitude mode
+Fix search bar
+Fix selection double slider
+Add a check button to enable group mode contour plot to show negative plot
+
+
+
+## 2013-03-28 5:25pm ##
+### Change 
 Add transition to the contour plot
 ### To Do 
+Fix release date axis
 Add a check button to enable density mode vs amplitude mode
 Fix search bar
 Fix selection double slider
