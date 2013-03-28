@@ -1166,21 +1166,21 @@ science.stats.kde2D = function( XData, YData, ZData, XCoord, YCoord, XBandwidth,
     var points=[];
     var i,j;
     
-    for (i=0; i<YCoord.length; i++) {
+    for (i=0; i<XCoord.length; i++) {
         
         console.log(i);
         
         var xPoints=[];
         
-        for (j=0; j<XCoord.length; j++) {
+        for (j=0; j<YCoord.length; j++) {
             
             var k;
             
             var acc=0;
             
-            for (k=0;k<XData.length;k++) {
+            for (k=0;k<YData.length;k++) {
                 
-                acc += ZData[k] * kernel([(XCoord[j]-XData[k])/XBandwidth, (YCoord[i]-YData[k])/YBandwidth] );
+                acc += ZData[k] * kernel([(XCoord[i]-XData[k])/XBandwidth, (YCoord[j]-YData[k])/YBandwidth] );
                 
             }
             

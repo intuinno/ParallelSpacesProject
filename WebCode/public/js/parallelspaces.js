@@ -1,6 +1,6 @@
 $('#page1').live('pageinit', function() {
 
-	var PSmin = 4, PSmax = 5;
+	var PSmin = 4.5, PSmax = 5;
 
 	$("#range-1a").on("change", function(event) {
 
@@ -37,6 +37,7 @@ $('#page1').live('pageinit', function() {
     'technician',
     'writer'];
 
+    var numStepForKDE = 10;
 	var ratings;
 	var userData;
 	var movieData;
@@ -77,6 +78,7 @@ $('#page1').live('pageinit', function() {
 		return y(+d.Y);
 	}
 
+   
 	//variables for Geo mapping
 	var proj = d3.geo.albersUsa();
 	var path = d3.geo.path().projection(proj);
@@ -474,47 +476,49 @@ $('#page1').live('pageinit', function() {
 							this.classList.add(tempClass);
 							
 							var tempDataX = tempGalaxy.map(function(d) {
-							    return +d.X;
+							    return xValue(d);
 							});
 							
 							var tempDataY = tempGalaxy.map(function(d) {
-							    return +d.Y;
+							    return yValue(d);
 							});
 							
 							var tempDataZ = tempGalaxy.map(function (d){ 
-							    return +d.avgReview;
+							    return ratings[i][d.index];
 							    
 							});
 							
-							var data2D = science.stats.kde2D(tempDataX, tempDataY, tempDataZ, d3.range(0,1,0.1),d3.range(0,1,0.1), 0.05,0.05);
+							numStepForKDE = 40;
+							
+							var XStep = (x.range()[1]-x.range()[0])/numStepForKDE ;
+							var YStep = (y.range()[1]-y.range()[0])/numStepForKDE ;
+							
+							var XCoord = d3.range(x.range()[0], x.range()[1]+XStep, XStep);
+							var YCoord = d3.range(y.range()[0], y.range()[1]+YStep, YStep);
+							
+							
+							var data2D = science.stats.kde2D(tempDataX, tempDataY, tempDataZ, XCoord, YCoord, XStep/1, YStep/1 );
 							
 							var max = d3.max(data2D,function(d){return d3.max(d);});
 							var min = d3.min(data2D,function(d){return d3.min(d);});
 
 
-                            var cliff = -1000;
-                        
-                                
-                              data2D.push(d3.range(data2D[0].length).map(function() { return cliff; }));
-                              data2D.unshift(d3.range(data2D[0].length).map(function() { return cliff; }));
-                              data2D.forEach(function(d) {
-                                d.push(cliff);
-                                d.unshift(cliff);
-                              });
-                              
-                        
-                                                      
+                             // var cliff = -1000;
+//                              
+                               // data2D.push(d3.range(data2D[0].length).map(function() { return cliff; }));
+                               // data2D.unshift(d3.range(data2D[0].length).map(function() { return cliff; }));
+                               // data2D.forEach(function(d) {
+                               // d.push(cliff);
+                               // d.unshift(cliff);
+                               // });
+//                                                       
                               var c = new Conrec(),
-                                  xs = d3.range(-0.1, 1.1,0.1),
-                                  ys = d3.range(-0.1, 1.1,0.1),
-                                  zs = d3.range(min, max, (max-min)/10),
-                                  xContour = d3.scale.linear().range(x.range()).domain([0.1,0.9]),
-                                  yContour = d3.scale.linear().range(y.range()).domain([0.1,0.9]);
+                                  zs = d3.range(min, max, (max-min)/10);
                                   
                                var categorycolor = d3.scale.category10();
                                
                              
-                              c.contour(data2D, 0, xs.length-1, 0, ys.length-1, xs, ys, zs.length, zs);
+                              c.contour(data2D, 0, XCoord.length-1, 0, YCoord.length-1, XCoord, YCoord, zs.length, zs);
                                 
                                 contourMovie.push(c.contourList());
                                 
@@ -525,8 +529,6 @@ $('#page1').live('pageinit', function() {
                                                     .data(contourMovie)
                                                     .enter().append("g")
                                                     .each( function(d,i) {
-                                                        
-                                                       
                                                        
                                                        var f = i;
                         
@@ -538,16 +540,13 @@ $('#page1').live('pageinit', function() {
                                                                 
                                                                 return colourCategory[f](d.level);})
                                                             .style("stroke","black")
-                                                            .style("opacity",0.2)
+                                                            .style("opacity",0.7)
                                                             .attr("d",d3.svg.line()
-                                                                .x(function(d) { return xContour(d.y); })
-                                                                .y(function(d) { return yContour(d.x); }));
+                                                                .x(function(d) { return +(d.x); })
+                                                                .y(function(d) { return +(d.y); }));
                                                                 
                                                             }
                                                   );
-                							
-							
-						
 			
 						} else {
 							

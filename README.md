@@ -1,3 +1,14 @@
+## 2013-03-28 2:10pm ##
+### Change 
+Add a support for the multiple axis of contour. 
+### To Do 
+Add transition to the contour plot
+Add a check button to enable density mode vs amplitude mode
+Fix search bar
+Fix selection double slider
+Add a check button to enable group mode contour plot to show negative plot
+
+
 ## 2013-03-27 6:49pm ##
 ### Change 
 The User Y axis change properly now.
