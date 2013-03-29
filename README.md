@@ -1,5 +1,16 @@
 ## 2013-03-28 12:37pm ##
 ### Change 
+Fix search bar
+### To Do 
+Add a check button to enable density mode vs amplitude mode
+Fix search bar
+Fix selection double slider
+Add a check button to enable group mode contour plot to show negative plot
+
+
+
+## 2013-03-28 12:37pm ##
+### Change 
 Fix User space Zoom bug
 Fix location contour bug
 ### To Do 

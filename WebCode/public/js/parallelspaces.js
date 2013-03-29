@@ -731,29 +731,14 @@ SelectionStatesSpace.prototype = {
 				var $a = $(e.currentTarget);
 				$('#searchMovie').val($a.text());
 				$('#searchMovie').autocomplete('clear');
+				
+				var index = movieTitleOrig.indexOf($a.text());
 
-				var tempGalaxy = [];
+                var selection = svgMovieGroup.selectAll("circle");
+                
+                var targetObject = selection.filter(function (d,i) { return i === index ? this:null;});
 
-				isMovieSelected = true;
-
-				var i = movieTitleOrig.indexOf($a.text());
-
-				selectedMovies.push(i);
-
-				for (var count = 0; count < ratings.length; count++) {
-
-					if (ratings[count][i] >= PSmin && ratings[count][i] <= PSmax) {
-
-						//console.log('The User ' + count +' gave ' + i + 'th  movie 5 star');
-
-						tempGalaxy.push(count);
-
-					}
-				}
-
-				userGalaxy.push(tempGalaxy);
-
-				redraw();
+				targetObject.on("click")(movieData[index],index);
 
 			}
 		});
