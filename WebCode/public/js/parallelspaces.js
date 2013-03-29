@@ -47,7 +47,87 @@ $('#page1').live('pageinit', function() {
     'technician',
     'writer'];
     
-    
+
+ function updateDisplay(space, selectionState) {
+
+
+            var mySelectionState = selectionState;
+            
+            if ( space === "movie") {
+                var mySelectionGroup = svgMovieSelectionGroup;
+                var myQueryGroup = svgUserSelectionGroup;
+                var xSelect = xValue;
+                var ySelect = yValue;
+                var rSelect = rMovieScale;
+                
+                var xQuery = xValueUser;
+                var yQuery = yValueUser;
+                var rQuery = rUserScale;
+                
+            } else if (space === 'user') {
+                var mySelectionGroup = svgUserSelectionGroup;
+                var myQueryGroup = svgMovieSelectionGroup;
+                
+                var xSelect = xValueUser;
+                var ySelect = yValueUser;
+                var rSelect = rUserScale;
+                
+                var xQuery = xValue;
+                var yQuery = yValue;
+                var rQuery = rMovieScale;
+                
+                 }
+
+            //Movie Selection Halo
+            mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).enter().append("g").each(function(d, i) {
+
+                var color = ordinalColor(d.assignedClass);
+
+                var selectionCircle = d3.select(this).selectAll("circle").data(d.selection).enter().append("circle").attr("cx", function(d) {
+                    return xSelect(d);
+                }).attr("cy", function(d) {
+                    return ySelect(d);
+                }).attr("r", function(d) {
+                    return rSelect(+d.numReview);
+                }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
+
+            });
+            
+            //Movie Selection Remove
+            mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).exit().transition().duration(500).remove();
+
+            
+            //User Selection Halo
+           
+            myQueryGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).enter().append("g").each(function(d, i) {
+
+                var color = ordinalColor(d.assignedClass);
+
+                var selectionCircle = d3.select(this).selectAll("circle").data(d.query).enter().append("circle").attr("cx", function(d) {
+                    return xQuery(d);
+                }).attr("cy", function(d) {
+                    return yQuery(d);
+                }).attr("r", function(d) {
+                    return rQuery(+d.numReview);
+                }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
+
+            });
+            
+            myQueryGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).exit().transition().duration(500).remove();
+            
+            updateContour(space, mySelectionState);
+
+        }     
+
+ 
 function reQuery(d) {
     
     if (d.mode === 'single') {
@@ -366,75 +446,52 @@ SelectionStatesSpace.prototype = {
 						
 							
 							isMovieSelected = true;
-							clearMovieSelection();
+							clearSelection();
 						
 						}
-						if (selectedMovies.indexOf(d) === -1) {
-			
-							selectedMovies.push(d);
-							
-							var newIndex = 1;
-							
-														
-							while ( selectedClassList.indexOf(newIndex) != -1) {
-								newIndex += 1;
-								
-							}
-							
-							selectedClassList.push(newIndex);
-						
-							tempClass = "selected" + newIndex;
-			
-							for (var count = 0; count < userLength; count++) {
-			
-								if (ratings[count][i] >= PSmin && ratings[count][i] <= PSmax) {
-			
-									tempGalaxy.push(userData[count]);
-								}
-							}
-							
-							xScaleUser.domain(xDomainExtentUser);
-							yScaleUser.domain(yDomainExtentUser);
-			
-							svgUserSelectionGroup.selectAll("." + tempClass)
-										.data(tempGalaxy, function(d) {
-											return +d.num;
-										})
-										.enter()
-										.append("circle")
-										.attr("cx", function(d) {
-											return xValueUser(d);
-										})
-										.attr("cy", function(d) {
-											return yValueUser(d);
-										})
-										.attr("r", function(d) {
-											return rUserScale(+d.numReview);
-										})
-										.classed(tempClass, true)
-										.classed("selectedCircle",true);
-			
-							this.classList.add(tempClass);
-							
-							
-			
-						} else {
-							
-							
-							var tempIndex = selectedMovies.indexOf(d);
-							
-							tempClass = "selected" + (selectedClassList[tempIndex]);
-							
-							selectedMovies.splice(tempIndex, 1);
-							
-							selectedClassList.splice(tempIndex,1);
-							
-							this.classList.remove(tempClass);
-							
-							svgUserSelectionGroup.selectAll("." + tempClass)
-										.remove();
-										
-						}
+						if (selectionStatesMovie.isSelected(d) === false) {
+                             //Here this star is newly selected 
+                             //So Add to the Selection
+                             
+                             if( isGroupSelectionMode ) {
+                                 //Group mode:  Add to the current selection
+                                 
+                             } else {
+                                 //Individual mode: Add to the new selection
+                                 
+                                 for (var count = 0; count < userLength; count++) {
+            
+                                     if (ratings[count][i] >= PSmin && ratings[count][i] <= PSmax) {
+                
+                                        tempGalaxy.push(userData[count]);
+                                     }
+                                 }
+                                 
+                                 var newClass = selectionStatesMovie.newClass(); 
+                                 var newQuery = [d];
+                                 
+                                 var tempQuerySet = new QuerySets('movie',newQuery, tempGalaxy, newClass,'single');
+                                 
+                                 selectionStatesMovie.add(tempQuerySet);
+                                 
+                                 x.domain(xDomainExtent);
+                                 y.domain(yDomainExtent);
+                                
+                             }
+                            
+            
+                        } else {
+                            
+                            //Here this star is already selected
+                            //So remove it 
+                            
+                            
+                                selectionStatesMovie.removeEntity(d);
+    
+                                            
+                        }
+                        
+                        updateDisplay('user',selectionStatesMovie); 
 
 
 					});
@@ -502,9 +559,12 @@ SelectionStatesSpace.prototype = {
 							.attr("fill","white");
 							
 	
+	 var svgUserContourGroup = svgUserBody.append("svg:g").attr('class','userContourGroup');
+	 
 	var svgUserSelectionGroup = svgUserBody.append("svg:g").attr('class', 'userSelectionSVGGroup');
 
 	var svgUserGroup = svgUserBody.append("svg:g").attr('class', 'userSVGGroup');
+
 
 
 	svgUser.append("svg:g")
@@ -554,7 +614,7 @@ SelectionStatesSpace.prototype = {
 						
 							
 							isMovieSelected = false;
-							clearUserSelection();
+							clearSelection();
 						
 						}
 						if (selectionStatesUser.isSelected(d) === false) {
@@ -603,66 +663,14 @@ SelectionStatesSpace.prototype = {
 											
 						}
 						
-						updateDisplay(); 
+						updateDisplay('movie',selectionStatesUser); 
 
 
 					});
 					
 														
 		
-        function updateDisplay() {
-
-
-            //Movie Selection Halo
-            svgMovieSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
-                return +d.assignedClass;
-            }).enter().append("g").each(function(d, i) {
-
-                var color = ordinalColor(d.assignedClass);
-
-                var selectionCircle = d3.select(this).selectAll("circle").data(d.selection).enter().append("circle").attr("cx", function(d) {
-                    return xValue(d);
-                }).attr("cy", function(d) {
-                    return yValue(d);
-                }).attr("r", function(d) {
-                    return rMovieScale(+d.numReview);
-                }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
-
-            });
-            
-            //Movie Selection Remove
-            svgMovieSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
-                return +d.assignedClass;
-            }).exit().transition().duration(500).remove();
-
-            
-            //User Selection Halo
-           
-            svgUserSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
-                return +d.assignedClass;
-            }).enter().append("g").each(function(d, i) {
-
-                var color = ordinalColor(d.assignedClass);
-
-                var selectionCircle = d3.select(this).selectAll("circle").data(d.query).enter().append("circle").attr("cx", function(d) {
-                    return xValueUser(d);
-                }).attr("cy", function(d) {
-                    return yValueUser(d);
-                }).attr("r", function(d) {
-                    return rUserScale(+d.numReview);
-                }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
-
-            });
-            
-            svgUserSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
-                return +d.assignedClass;
-            }).exit().transition().duration(500).remove();
-            
-            updateContourMovie();
-
-        }			
-
-			
+       
 
 		$('.userCircle').tipsy({
 			gravity : 'w',
@@ -688,49 +696,21 @@ SelectionStatesSpace.prototype = {
 	
 	function zoomedUser() {
 // 
+        svgUserContourGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		svgUserSelectionGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		svgUserGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		svgUser.select(".x.axis").call(xAxisUser);
 		svgUser.select(".y.axis").call(yAxisUser);
 	}
 
-	function clearMovieSelection() {
 
-		movieGalaxy = [];
-		selectedUsers = [];
-	
+	function clearSelection() {
 
-		svgMovieSelectionGroup.selectAll(".selectedCircle").remove();
+		selectionStatesMovie = new SelectionStatesSpace() ;
+		selectionStatesUser = new SelectionStatesSpace();
 		
-		for (var i=0; i<selectedClassList.length; i++) {
-		    
-		    var tempClass = "selected" + selectedClassList[i];
-		    
-		    svgUserGroup.selectAll("."+tempClass)
-		    			.classed(tempClass, false);
-		 }
-		 
-		selectedClassList = [];
-	}
 
-	function clearUserSelection() {
-
-		userGalaxy = [];
-		selectedMovies = [];
 		
-		svgUserSelectionGroup.selectAll(".selectedCircle").remove();
-
-		for (var i=0; i<selectedClassList.length; i++) {
-		    
-		    var tempClass = "selected" + selectedClassList[i];
-		    
-		    
-		    svgMovieGroup.selectAll("."+tempClass)
-		    			.classed(tempClass, false);
-		 }
-		    			    
-		
-        selectedClassList = [];
 	}
 
 	
@@ -862,12 +842,24 @@ SelectionStatesSpace.prototype = {
 				.attr('cx', xValue)
 				.attr("cy", yValue);	
 				
-			updateContourMovie();	
+			updateContour('movie',selectionStatesUser);	
 					
 	});
 	
 	
-    function updateContourMovie() {
+    function updateContour(Space, SelectionStates) {
+        
+        var mySelectionStates = SelectionStates;
+        
+        if (Space === 'movie') {
+            
+            myContourGroup = svgMovieContourGroup;
+            
+        } else if (Space === 'user') {
+            
+            myContourGroup = svgUserContourGroup;
+        }
+        
                 
         var min=100, max=-100;
         
@@ -879,7 +871,7 @@ SelectionStatesSpace.prototype = {
         var XCoord = d3.range(x.range()[0]-3*XStep, x.range()[1] + 3*XStep, XStep);
         var YCoord = d3.range(y.range()[0]-3*YStep, y.range()[1] + 3*YStep, YStep);
         
-        selectedData2D = selectionStatesUser.querySetsList.map(function(z, i) {
+        selectedData2D = mySelectionStates.querySetsList.map(function(z, i) {
 
             tempGalaxy = z.selection;
             
@@ -891,6 +883,7 @@ SelectionStatesSpace.prototype = {
                 return yValue(d);
             });
 
+            if (Space === 'movie') {
             var tempDataZ = tempGalaxy.map(function(d) {
                 
                 var index = 0;
@@ -901,6 +894,21 @@ SelectionStatesSpace.prototype = {
                 } 
                 return myRating;
             });
+            
+            } else if (Space ==='user') {
+                
+                var tempDataZ = tempGalaxy.map(function(d) {
+                
+                var index = 0;
+                var myRating =0;
+                
+                for (index =0; index < z.query.length; index++) {
+                    myRating += ratings[d.num][z.query[index].index];    
+                } 
+                return myRating;
+            });
+                
+            }
 
 
 
@@ -932,7 +940,7 @@ SelectionStatesSpace.prototype = {
 
             c.contour(data2D, 0, XCoord.length - 1, 0, YCoord.length - 1, XCoord, YCoord, zs.length, zs);
 
-            selectionStatesUser.querySetsList[i].contourList =  c.contourList();
+            mySelectionStates.querySetsList[i].contourList =  c.contourList();
 
         });
         
@@ -940,8 +948,8 @@ SelectionStatesSpace.prototype = {
             colourCategory[j] = d3.scale.linear().domain([min, max]).range(["#fff", ordinalColor(j)]);
 
         
-        var contourGroup = svgMovieContourGroup.selectAll("g")
-                        .data(selectionStatesUser.querySetsList, function(d) {return d.assignedClass;});
+        var contourGroup = myContourGroup.selectAll("g")
+                        .data(mySelectionStates.querySetsList, function(d) {return d.assignedClass;});
                         
             contourGroup.enter().append("g");
       
@@ -953,10 +961,9 @@ SelectionStatesSpace.prototype = {
 
                             var paths =   d3.select(this)
                                 .selectAll("path")
-                                .data(d.contourList);
-                                // .data(d.contourList, function(d) {
-                                    // return d.level;
-                                // });
+                                .data(d.contourList, function(d) {
+                                    return d.level;
+                                });
                              
                              
                             paths.enter()
@@ -966,13 +973,13 @@ SelectionStatesSpace.prototype = {
                                 paths.style("fill", function(d) {
 
                                     return colourCategory[f](d.level);
-                                }).transition().duration(1000)
+                                }).transition().delay(500).duration(1000)
                                  .attr("d", d3.svg.line().x(function(d) {
                                     return +(d.x);
                                 }).y(function(d) {
                                     return +(d.y);
                                 })).attr("fill-opacity",0.01)
-                                .transition().duration(500)
+                                .transition().duration(300)
                                 .attr("fill-opacity",0.8);
                                 
                                 
@@ -1057,6 +1064,8 @@ SelectionStatesSpace.prototype = {
 			y.domain(yDomainExtent);
 			
 			zoomMovie.x(x).y(y);
+			
+			svgMovieContourGroup.attr("transform","scale(1)");
 													
 			svgMovieSelectionGroup.attr("transform", "scale(1)");
 			
@@ -1074,6 +1083,8 @@ SelectionStatesSpace.prototype = {
 				.duration(1000)
 				.attr('cx', xValue)
 				.attr("cy", yValue);		
+				
+		     updateContour('movie',selectionStatesUser);
 	});
 	
 	$('#userXAxisMenu').on('change', function() {

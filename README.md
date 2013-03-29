@@ -1,3 +1,14 @@
+## 2013-03-28 12:37pm ##
+### Change 
+Make Movie Y Axis rotation
+### To Do 
+Fix User space contour axis rotation
+Add a check button to enable density mode vs amplitude mode
+Fix search bar
+Fix selection double slider
+Add a check button to enable group mode contour plot to show negative plot
+
+
 ## 2013-03-28 8:55pm ##
 ### Change 
 Added Unselection mechanism
