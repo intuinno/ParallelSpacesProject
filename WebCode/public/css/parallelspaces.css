@@ -54,6 +54,8 @@ svg {
 	stroke: #fff;
 }
 
-.selectionCircle {
+
+path {
 	opacity: 0.5;
+	stroke:black;
 }

@@ -47,14 +47,28 @@ $('#page1').live('pageinit', function() {
     'technician',
     'writer'];
     
+    
+function reQuery(d) {
+    
+    if (d.mode === 'single') {
+        
+        if(d.query.length === 0) {
+            
+            return [];
+        } 
+    }
+}
+    
+     
 //Class for one single selection    
-function QuerySets(query, selection, newClass) {
+function QuerySets(domain, query, selection, newClass, mode) {
     
-    
+    this.domain = domain; //domain can be 'user' or 'movie'
     this.query =query; 
     this.selection =selection;
     this.assignedClass= newClass;
     this.contourList = [];
+    this.mode = mode;  //mode can be  'single', 'groupOR','groupAND'
     
           
 }
@@ -66,7 +80,16 @@ QuerySets.prototype = {
         } else {
             return true;
         }
+    },
+    
+    remove: function (d) {
+        
+        this.query.splice(d,1);
+        
+        this.selection = reQuery(this);
     }
+    
+    
 }
 
 function SelectionStatesSpace()  {
@@ -108,7 +131,34 @@ SelectionStatesSpace.prototype = {
     add: function (d) {
         
         this.querySetsList.push(d);
-    }
+    },
+    
+    removeEntity: function (d) {
+        
+        var z;
+        
+        for (z=0; z < this.querySetsList.length;z++) {
+            
+            if(this.querySetsList[z].query.indexOf(d) != -1) {
+                
+                this.querySetsList[z].remove(this.querySetsList[z].query.indexOf(d));
+                
+                if (this.querySetsList[z].query.length == 0) {
+                    
+                    this.remove(z);
+                }
+            }
+        }
+        
+     },
+         
+    remove: function (d) {
+        
+        this.querySetsList.splice(d,1);
+    }    
+      
+        
+   
 }
 
     //Array of QuerySets to represent selection States
@@ -121,9 +171,7 @@ SelectionStatesSpace.prototype = {
     //Parameters for Tuning
     var numStepForKDE = 20;
     var numLevelForContour = 10;
-	var movieStarColor = d3.rgb("darkgray");
-    var userStarColor = d3.rgb("darkgray");
-    var movieStarHue = 45;
+	var movieStarHue = 45;
     var userStarHue = 45;
     var maxStarRadius = 10;
     var minStarRadius = 2;
@@ -530,101 +578,90 @@ SelectionStatesSpace.prototype = {
 			                     var newClass = selectionStatesUser.newClass(); 
 			                     var newQuery = [d];
 			                     
-			                     var tempQuerySet = new QuerySets(newQuery, tempGalaxy, newClass);
+			                     var tempQuerySet = new QuerySets('user',newQuery, tempGalaxy, newClass,'single');
                                  
 			                     selectionStatesUser.add(tempQuerySet);
 			                     
 			                     x.domain(xDomainExtent);
                                  y.domain(yDomainExtent);
                                 
-                                svgMovieSelectionGroup.selectAll("g")
-                                            .data(selectionStatesUser.querySetsList, function(d) {
-                                                return +d.assignedClass;
-                                            })
-                                            .enter().append("g")
-                                            .each (function(d,i) {
-                                                
-                                                var color = ordinalColor(d.assignedClass);
-                                                
-                                                var selectionCircle = d3.select(this)
-                                                                        .selectAll("circle")
-                                                                        .data(d.selection)
-                                                                        .enter()
-                                                                        .append("circle") 
-                                                                        .attr("cx", function(d) {
-                                                                            return xValue(d);
-                                                                        })
-                                                                        .attr("cy", function(d) {
-                                                                            return yValue(d);
-                                                                        })
-                                                                        .attr("r", function(d) {
-                                                                            return rMovieScale(+d.numReview);
-                                                                        })
-                                                                        .attr("fill",color)
-                                                                        .attr("stroke",color)
-                                                                        .classed("selectedCircle",true);
-                                                                        
-                                               });
-                                                                                                  
-                                                                           
-                                updateContourMovie();
                                 
-                                 svgUserSelectionGroup.selectAll("g")
-                                            .data(selectionStatesUser.querySetsList, function(d) {
-                                                return +d.assignedClass;
-                                            })
-                                            .enter().append("g")
-                                            .each (function(d,i) {
-                                                
-                                                var color = ordinalColor(d.assignedClass);
-                                                
-                                                var selectionCircle = d3.select(this)
-                                                                        .selectAll("circle")
-                                                                        .data(d.query)
-                                                                        .enter()
-                                                                        .append("circle") 
-                                                                        .attr("cx", function(d) {
-                                                                            return xValueUser(d);
-                                                                        })
-                                                                        .attr("cy", function(d) {
-                                                                            return yValueUser(d);
-                                                                        })
-                                                                        .attr("r", function(d) {
-                                                                            return rUserScale(+d.numReview);
-                                                                        })
-                                                                        .attr("fill", color)
-                                                                        .attr("stroke",color)
-                                                                        .classed("selectedCircle",true);
-                                                                        
-                                               });
-                
-			                     
+                                 
+                                 
+                               
 			                 }
 			             	
 			
 						} else {
 							
+							//Here this star is already selected
+							//So remove it 
 							
-							var tempIndex = selectedUsers.indexOf(d);
 							
-							tempClass = "selected" + (selectedClassList[tempIndex]);
-							
-							selectedUsers.splice(tempIndex, 1);
-							
-							selectedClassList.splice(tempIndex,1);
-							
-							this.classList.remove(tempClass);
-							
-							svgMovieSelectionGroup.selectAll("." + tempClass)
-										.remove();
-										
+    							selectionStatesUser.removeEntity(d);
+	
+											
 						}
+						
+						updateDisplay(); 
 
 
 					});
 					
 														
-					
+		
+        function updateDisplay() {
+
+
+            //Movie Selection Halo
+            svgMovieSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).enter().append("g").each(function(d, i) {
+
+                var color = ordinalColor(d.assignedClass);
+
+                var selectionCircle = d3.select(this).selectAll("circle").data(d.selection).enter().append("circle").attr("cx", function(d) {
+                    return xValue(d);
+                }).attr("cy", function(d) {
+                    return yValue(d);
+                }).attr("r", function(d) {
+                    return rMovieScale(+d.numReview);
+                }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
+
+            });
+            
+            //Movie Selection Remove
+            svgMovieSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).exit().transition().duration(500).remove();
+
+            
+            //User Selection Halo
+           
+            svgUserSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).enter().append("g").each(function(d, i) {
+
+                var color = ordinalColor(d.assignedClass);
+
+                var selectionCircle = d3.select(this).selectAll("circle").data(d.query).enter().append("circle").attr("cx", function(d) {
+                    return xValueUser(d);
+                }).attr("cy", function(d) {
+                    return yValueUser(d);
+                }).attr("r", function(d) {
+                    return rUserScale(+d.numReview);
+                }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
+
+            });
+            
+            svgUserSelectionGroup.selectAll("g").data(selectionStatesUser.querySetsList, function(d) {
+                return +d.assignedClass;
+            }).exit().transition().duration(500).remove();
+            
+            updateContourMovie();
+
+        }			
+
 			
 
 		$('.userCircle').tipsy({
@@ -889,88 +926,67 @@ SelectionStatesSpace.prototype = {
             
         });
         
-         selectedGalaxyContourMovie = selectedData2D.map(function (data2D,i) {
+         selectedData2D.map(function (data2D,i) {
              
             var c = new Conrec(), zs = d3.range(min, max, (max - min) / numLevelForContour);
 
             c.contour(data2D, 0, XCoord.length - 1, 0, YCoord.length - 1, XCoord, YCoord, zs.length, zs);
 
-            return c.contourList();
+            selectionStatesUser.querySetsList[i].contourList =  c.contourList();
 
         });
-
-       
-        var categorycolor = d3.scale.category10();
-        for (var j = 0; j < 10; j++)
-            colourCategory[j] = d3.scale.linear().domain([min, max]).range(["#fff", categorycolor(j)]);
+        
+         for (var j = 0; j < 10; j++)
+            colourCategory[j] = d3.scale.linear().domain([min, max]).range(["#fff", ordinalColor(j)]);
 
         
-        svgMovieContourGroup.selectAll("g")
-                        .data(selectedGalaxyContourMovie)
-                        .each(function(d, i) {
+        var contourGroup = svgMovieContourGroup.selectAll("g")
+                        .data(selectionStatesUser.querySetsList, function(d) {return d.assignedClass;});
+                        
+            contourGroup.enter().append("g");
+      
+      
+                        contourGroup.each(function(d, i) {
 
-                            var f = i;
+                            var f = d.assignedClass;
 
 
                             var paths =   d3.select(this)
                                 .selectAll("path")
-                                .data(d);
+                                .data(d.contourList);
+                                // .data(d.contourList, function(d) {
+                                    // return d.level;
+                                // });
+                             
+                             
+                            paths.enter()
+                                .append("path");
                                 
-                           paths.transition().duration(1000)
-                                .style("fill", function(d) {
+                                
+                                paths.style("fill", function(d) {
 
                                     return colourCategory[f](d.level);
-                                })
-                                .style("stroke", "black")
-                                .style("opacity", 0.7)
-                                .attr("d", d3.svg.line().x(function(d) {
+                                }).transition().duration(1000)
+                                 .attr("d", d3.svg.line().x(function(d) {
                                     return +(d.x);
                                 }).y(function(d) {
                                     return +(d.y);
-                                }));
+                                })).attr("fill-opacity",0.01)
+                                .transition().duration(500)
+                                .attr("fill-opacity",0.8);
                                 
                                 
-                           paths.enter()
-                                .append("path").transition().duration(1000)
-                                .style("fill", function(d) {
-
-                                    return colourCategory[f](d.level);
-                                })
-                                .style("stroke", "black")
-                                .style("opacity", 0.7)                                
-                                .attr("d", d3.svg.line().x(function(d) {
-                                    return +(d.x);
-                                }).y(function(d) {
-                                    return +(d.y);
-                                }));
+                          
+                                
+                          
                                 
                                paths.exit()
                                 .remove();
 
-                        })
-                        .enter().append("g")
-                        .each(function(d, i) {
-
-                            var f = i;
-
-                            d3.select(this)
-                                .selectAll("path")
-                                .data(d)
-                                .enter()
-                                .append("path")
-                                .style("fill", function(d) {
-
-                                    return colourCategory[f](d.level);
-                                })
-                                .style("stroke", "black")
-                                .style("opacity", 0.7)
-                                .attr("d", d3.svg.line().x(function(d) {
-                                    return +(d.x);
-                                }).y(function(d) {
-                                    return +(d.y);
-                                }));
-
                         });
+                        
+                                          
+                contourGroup.exit().transition().duration(500).remove();
         
     }
 
