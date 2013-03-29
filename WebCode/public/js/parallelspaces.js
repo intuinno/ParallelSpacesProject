@@ -709,6 +709,8 @@ SelectionStatesSpace.prototype = {
 		selectionStatesMovie = new SelectionStatesSpace() ;
 		selectionStatesUser = new SelectionStatesSpace();
 		
+		updateDisplay('movie', selectionStatesUser);
+		updateDisplay('user',selectionStatesMovie);
 
 		
 	}
@@ -854,10 +856,21 @@ SelectionStatesSpace.prototype = {
         if (Space === 'movie') {
             
             myContourGroup = svgMovieContourGroup;
+            myX = xValue;
+            myY = yValue;
+            
+            myXScale = x;
+            myYScale = y;
             
         } else if (Space === 'user') {
             
             myContourGroup = svgUserContourGroup;
+            
+            myX = xValueUser;
+            myY = yValueUser;
+            
+            myXScale = xScaleUser;
+            myYScale = yScaleUser;
         }
         
                 
@@ -865,22 +878,22 @@ SelectionStatesSpace.prototype = {
         
         var selectedData2D=[];
    
-        var XStep = (x.range()[1] - x.range()[0]) / numStepForKDE;
-        var YStep = (y.range()[1] - y.range()[0]) / numStepForKDE;
+        var XStep = (myXScale.range()[1] - myXScale.range()[0]) / numStepForKDE;
+        var YStep = (myYScale.range()[1] - myYScale.range()[0]) / numStepForKDE;
 
-        var XCoord = d3.range(x.range()[0]-3*XStep, x.range()[1] + 3*XStep, XStep);
-        var YCoord = d3.range(y.range()[0]-3*YStep, y.range()[1] + 3*YStep, YStep);
+        var XCoord = d3.range(myXScale.range()[0]-3*XStep, myXScale.range()[1] + 3*XStep, XStep);
+        var YCoord = d3.range(myYScale.range()[0]-3*YStep, myYScale.range()[1] + 3*YStep, YStep);
         
         selectedData2D = mySelectionStates.querySetsList.map(function(z, i) {
 
             tempGalaxy = z.selection;
             
             var tempDataX = tempGalaxy.map(function(d) {
-                return xValue(d);
+                return myX(d);
             });
 
             var tempDataY = tempGalaxy.map(function(d) {
-                return yValue(d);
+                return myY(d);
             });
 
             if (Space === 'movie') {
@@ -973,7 +986,7 @@ SelectionStatesSpace.prototype = {
                                 paths.style("fill", function(d) {
 
                                     return colourCategory[f](d.level);
-                                }).transition().delay(500).duration(1000)
+                                }).transition().delay(200).duration(300)
                                  .attr("d", d3.svg.line().x(function(d) {
                                     return +(d.x);
                                 }).y(function(d) {
@@ -1130,6 +1143,9 @@ SelectionStatesSpace.prototype = {
 						.attr('cx', xValueUser)
 						.attr("cy", yValueUser);	
 						
+				updateContour("user",selectionStatesMovie);
+				
+						
 			} else {
 				
 				if(wasLocation === true) {
@@ -1240,6 +1256,8 @@ SelectionStatesSpace.prototype = {
 			yScaleUser.domain(yDomainExtentUser);
 			
 			zoomUser.x(xScaleUser).y(yScaleUser);
+			
+			svgUserContourGroup.attr("transform","scale(1)");
 													
 			svgUserSelectionGroup.attr("transform", "scale(1)");
 			
@@ -1257,6 +1275,8 @@ SelectionStatesSpace.prototype = {
 				.duration(1000)
 				.attr('cx', xValueUser)
 				.attr("cy", yValueUser);	
+				
+			updateContour("user",selectionStatesMovie);
 				
 			}
 						
@@ -1363,6 +1383,8 @@ SelectionStatesSpace.prototype = {
             xScaleUser.domain(xDomainExtentUser);
             
             zoomUser.x(xScaleUser).y(yScaleUser);
+            
+            svgUserContourGroup.attr("transform","scale(1)");
                                                     
             svgUserSelectionGroup.attr("transform", "scale(1)");
             
@@ -1380,6 +1402,8 @@ SelectionStatesSpace.prototype = {
                 .duration(1000)
                 .attr('cx', xValueUser)
                 .attr("cy", yValueUser);    
+                
+            updateContour('user',selectionStatesMovie);
                 
             
                         
