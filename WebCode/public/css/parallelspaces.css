@@ -2,12 +2,14 @@ div#movieCanvas {
 	float:left;
 	width:45%;
 	margin:0px;
+	padding: 0px 0px 0px 0px;
 	
 }
 div#userCanvas {
 	float:left;
 	width:45%;
 	margin:0px;
+	padding: 0px 0px 0px 0px;
 	
 }
 div#legend {

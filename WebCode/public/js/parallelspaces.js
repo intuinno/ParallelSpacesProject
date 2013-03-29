@@ -67,6 +67,7 @@ $('#page1').live('pageinit', function() {
                 yQuery = yValueUser;
                 rQuery = rUserScale;
                 
+                
             } else if (space === 'user') {
                 mySelectionGroup = svgUserSelectionGroup;
                 myQueryGroup = svgMovieSelectionGroup;
@@ -160,8 +161,43 @@ $('#page1').live('pageinit', function() {
             queryEntity.exit().remove();
             
             updateContour(space, mySelectionState);
-
+    
+            if(mySelectionState.querySetsList.length > 0 ) {
+                updateLegend(space, mySelectionState);
+    
+            }        
+            
         }     
+        
+function updateLegend(space, selectionState) {
+    
+    var myImage;
+    
+    if(space === 'movie') { 
+        
+        myImage = "images/leftarrow.png";
+        
+    } else if(space === 'user') {
+        
+        myImage = "images/rightarrow.png";
+        
+    }
+                
+
+    var mySVGImage =  svgLegend.selectAll("image");
+    
+    if (mySVGImage[0].length === 0 ) {
+        
+        mySVGImage = svgLegend.append("image");
+    }
+    
+    mySVGImage.attr("xlink:href",myImage)
+                .attr("x",20)
+                .attr("width","50px")
+                .attr("height","50px");
+               
+   
+}
 
  
 function reQuery(d) {
@@ -177,7 +213,7 @@ function reQuery(d) {
     
      
 //Class for one single selection    
-function QuerySets(domain, query, selection, newClass, mode) {
+function QuerySets(domain, query, selection, newClass, mode, relationMin, relationMax) {
     
     this.domain = domain; //domain can be 'user' or 'movie'
     this.query =query; 
@@ -185,8 +221,8 @@ function QuerySets(domain, query, selection, newClass, mode) {
     this.assignedClass= newClass;
     this.contourList = [];
     this.mode = mode;  //mode can be  'single', 'groupOR','groupAND'
-    this.relationMin;  //means a PSmin at the time of selection
-    this.relationMax; //means a PSmax at the time of selection
+    this.relationMin = relationMin;  //means a PSmin at the time of selection
+    this.relationMax = relationMax; //means a PSmax at the time of selection
     
           
 }
@@ -279,6 +315,16 @@ SelectionStatesSpace.prototype = {
    
 }
 
+    //Variables for Index 
+    var svgLegend = d3.select("#legend")
+                    .append("svg")
+                        .attr("height", 300);
+                        //.attr("viewBox", "0 0 " + 100 + " " +h)
+                        //.style("border", "1px solid silver");
+                        
+                        //.attr("transform", "translate(" + margin + "," + margin + ")");   
+    
+    
     //Array of QuerySets to represent selection States
     //selectionStatesMovie is for when movies are selected
     //selectionStatesUser is for when users are selected
@@ -509,7 +555,7 @@ SelectionStatesSpace.prototype = {
                                  var newClass = selectionStatesMovie.newClass(); 
                                  var newQuery = [d];
                                  
-                                 var tempQuerySet = new QuerySets('movie',newQuery, tempGalaxy, newClass,'single');
+                                 var tempQuerySet = new QuerySets('movie',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax);
                                  
                                  selectionStatesMovie.add(tempQuerySet);
                                  
@@ -678,7 +724,7 @@ SelectionStatesSpace.prototype = {
 			                     var newClass = selectionStatesUser.newClass(); 
 			                     var newQuery = [d];
 			                     
-			                     var tempQuerySet = new QuerySets('user',newQuery, tempGalaxy, newClass,'single');
+			                     var tempQuerySet = new QuerySets('user',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax);
                                  
 			                     selectionStatesUser.add(tempQuerySet);
 			                     
