@@ -541,7 +541,10 @@ SelectionStatesSpace.prototype = {
                                             .data(selectionStatesUser.querySetsList, function(d) {
                                                 return +d.assignedClass;
                                             })
+                                            .enter().append("g")
                                             .each (function(d,i) {
+                                                
+                                                var color = ordinalColor(d.assignedClass);
                                                 
                                                 var selectionCircle = d3.select(this)
                                                                         .selectAll("circle")
@@ -556,12 +559,44 @@ SelectionStatesSpace.prototype = {
                                                                         })
                                                                         .attr("r", function(d) {
                                                                             return rMovieScale(+d.numReview);
-                                                                        });
+                                                                        })
+                                                                        .attr("fill",color)
+                                                                        .attr("stroke",color)
+                                                                        .classed("selectedCircle",true);
                                                                         
                                                });
                                                                                                   
                                                                            
                                 updateContourMovie();
+                                
+                                 svgUserSelectionGroup.selectAll("g")
+                                            .data(selectionStatesUser.querySetsList, function(d) {
+                                                return +d.assignedClass;
+                                            })
+                                            .enter().append("g")
+                                            .each (function(d,i) {
+                                                
+                                                var color = ordinalColor(d.assignedClass);
+                                                
+                                                var selectionCircle = d3.select(this)
+                                                                        .selectAll("circle")
+                                                                        .data(d.query)
+                                                                        .enter()
+                                                                        .append("circle") 
+                                                                        .attr("cx", function(d) {
+                                                                            return xValueUser(d);
+                                                                        })
+                                                                        .attr("cy", function(d) {
+                                                                            return yValueUser(d);
+                                                                        })
+                                                                        .attr("r", function(d) {
+                                                                            return rUserScale(+d.numReview);
+                                                                        })
+                                                                        .attr("fill", color)
+                                                                        .attr("stroke",color)
+                                                                        .classed("selectedCircle",true);
+                                                                        
+                                               });
                 
 			                     
 			                 }

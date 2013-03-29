@@ -1,7 +1,7 @@
 #states { fill: none; stroke: #555555; stroke-width: 0.5px; }
 
 
-svg .selectedCircle {
+.selectedCircle {
 
 	opacity: 0.5;
 	stroke-width: 5;
@@ -54,53 +54,6 @@ svg {
 	stroke: #fff;
 }
 
-.selected1 {
-	fill:#1f77b4;
-	stroke:#1f77b4;
+.selectionCircle {
+	opacity: 0.5;
 }
-
-.selected2 {
-	fill:#ff7f0e;
-	stroke:#ff7f0e;
-}
-
-.selected3 {
-	fill:#2ca02c;
-	stroke:#2ca02c;
-}
-
-.selected4 {
-	fill:#d62728;
-	stroke:#d62728;
-}
-
-.selected5 {
-	fill:#9467bd;
-	stroke:#9467bd;
-}
-
-.selected6 {
-	fill:#8c564b;
-	stroke:#8c564b;
-}
-
-.selected7 {
-	fill:#e377c2;
-	stroke:#e377c2;
-}
-
-.selected8 {
-	fill:#7f7f7f;
-	stroke:#7f7f7f;
-}
-
-.selected9 {
-	fill:#bcbd22;
-	stroke:#bcbd22;
-}
-
-.selected10 {
-	fill:#17becf;
-	stroke:#17becf;
-}
-
