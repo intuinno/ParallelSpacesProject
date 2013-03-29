@@ -1,3 +1,24 @@
+div#movieCanvas {
+	float:left;
+	width:45%;
+	margin:0px;
+	
+}
+div#userCanvas {
+	float:left;
+	width:45%;
+	margin:0px;
+	
+}
+div#legend {
+	float:left;
+	padding: 0px 0px 0px 0px;
+	margin:0px;
+	background-color:white;
+	width:100px;
+}
+
+
 #states { fill: none; stroke: #555555; stroke-width: 0.5px; }
 
 

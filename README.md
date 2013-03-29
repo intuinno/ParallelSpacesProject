@@ -1,3 +1,12 @@
+## 2013-03-29 6:45pm ##
+### Change 
+Fix selection double slider
+### To Do 
+Add a check button to enable density mode vs amplitude mode
+Add a check button to enable group mode contour plot to show negative plot
+
+
+
 ## 2013-03-28 12:37pm ##
 ### Change 
 Fix search bar

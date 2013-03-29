@@ -14,12 +14,12 @@ $('#page1').live('pageinit', function() {
 
 	$("#range-1a").on("change", function(event) {
 
-		PSmin = event.target.value;
+		PSmin = +event.target.value;
 	});
 
 	$("#range-1b").on("change", function(event) {
 
-		PSmax = event.target.value;
+		PSmax = +event.target.value;
 	});
 
 	var w = 600;
@@ -55,6 +55,7 @@ $('#page1').live('pageinit', function() {
             
             var mySelectionGroup, myQueryGroup, xSelect, ySelect, rSelect, xQuery,yQuery, rQuery;
             
+
             if ( space === "movie") {
                 mySelectionGroup = svgMovieSelectionGroup;
                 myQueryGroup = svgUserSelectionGroup;
@@ -80,48 +81,83 @@ $('#page1').live('pageinit', function() {
                 
                  }
 
-            //Movie Selection Halo
-            mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList).enter().append("g").each(function(d, i) {
+            //Selection Space Halo
+            //Update + enter
+            //Bind            
+            var selectedEntity = mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) { 
+                    return +d.assignedClass;
+                    
+            });
+            
+            //Enter 
+            selectedEntity.enter().append("g");
+            
+            //Enter + Update
+            selectedEntity.each(function(d, i) {
 
                 var color = ordinalColor(d.assignedClass);
-
-                var selectionCircle = d3.select(this).selectAll("circle").data(d.selection).enter().append("circle").attr("cx", function(d) {
+                
+                //Bind
+                var selectionCircle = d3.select(this).selectAll("circle").data(d.selection);
+                
+                //Enter Append
+                selectionCircle.enter().append("circle");
+                
+                //Enter + Update 
+                selectionCircle.attr("cx", function(d) {
                     return xSelect(d);
                 }).attr("cy", function(d) {
                     return ySelect(d);
                 }).attr("r", function(d) {
                     return rSelect(+d.numReview);
                 }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
+                
+                //Exit Remove
+                selectionCircle.exit().remove();
 
             });
             
-            //Movie Selection Remove
-            mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
-                return +d.assignedClass;
-            }).exit().transition().duration(500).remove();
+            //Exit Remove
+            selectedEntity.exit().remove();
 
             
-            //User Selection Halo
+            //Query Space Halo
+            //Bind
            
-            myQueryGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
+            var queryEntity = myQueryGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
                 return +d.assignedClass;
-            }).enter().append("g").each(function(d, i) {
+            });
+            
+            //Enter Append
+            queryEntity.enter().append("g");
+                       
+            //Enter + Update            
+            queryEntity.each(function(d, i) {
 
                 var color = ordinalColor(d.assignedClass);
-
-                var selectionCircle = d3.select(this).selectAll("circle").data(d.query).enter().append("circle").attr("cx", function(d) {
+                
+                //Bind
+                var selectionCircle = d3.select(this).selectAll("circle").data(d.query);
+                
+                //Enter Append
+                selectionCircle.enter().append("circle");
+                
+                //Enter + Update
+                selectionCircle.attr("cx", function(d) {
                     return xQuery(d);
                 }).attr("cy", function(d) {
                     return yQuery(d);
                 }).attr("r", function(d) {
                     return rQuery(+d.numReview);
                 }).attr("fill", color).attr("stroke", color).classed("selectedCircle", true);
+                
+                selectionCircle.exit().remove();
+
 
             });
             
-            myQueryGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
-                return +d.assignedClass;
-            }).exit().transition().duration(500).remove();
+            //Exit Remove
+            queryEntity.exit().remove();
             
             updateContour(space, mySelectionState);
 
@@ -149,6 +185,8 @@ function QuerySets(domain, query, selection, newClass, mode) {
     this.assignedClass= newClass;
     this.contourList = [];
     this.mode = mode;  //mode can be  'single', 'groupOR','groupAND'
+    this.relationMin;  //means a PSmin at the time of selection
+    this.relationMax; //means a PSmax at the time of selection
     
           
 }
@@ -447,6 +485,7 @@ SelectionStatesSpace.prototype = {
 							
 							isMovieSelected = true;
 							clearSelection();
+							updateDisplay('movie', selectionStatesUser);
 						
 						}
 						if (selectionStatesMovie.isSelected(d) === false) {
@@ -615,6 +654,7 @@ SelectionStatesSpace.prototype = {
 							
 							isMovieSelected = false;
 							clearSelection();
+							updateDisplay('user', selectionStatesMovie);
 						
 						}
 						if (selectionStatesUser.isSelected(d) === false) {
@@ -716,126 +756,7 @@ SelectionStatesSpace.prototype = {
 		
 	}
 
-	
-	$(function() {
-
-		$("#searchMovie").autocomplete({
-			source : movieTitle,
-			target : $('#suggestions'),
-
-			minLength : 1,
-			matchFromStart : false,
-
-			callback : function(e) {
-
-				var $a = $(e.currentTarget);
-				$('#searchMovie').val($a.text());
-				$('#searchMovie').autocomplete('clear');
-				
-				var index = movieTitleOrig.indexOf($a.text());
-
-                var selection = svgMovieGroup.selectAll("circle");
-                
-                var targetObject = selection.filter(function (d,i) { return i === index ? this:null;});
-
-				targetObject.on("click")(movieData[index],index);
-
-			}
-		});
-	});
-	
-	$('#movieXAxisMenu').on('change', function() {
-		
-		var $this = $(this),
-			val	= $this.val();
-			
-			switch (val) {
-				case 'sim1':
-				
-					x = d3.scale.linear().range([margin, w - margin]);
-
-					xDomainExtent = d3.extent(movieData, function(d){return +d.X;});
-															
-					xValue = function (d) {
-						return x(+d.X);
-					}
-												
-					break;
-					
-				case 'avgReview':
-				
-					x = d3.scale.linear().range([margin, w - margin]);
-
-					xDomainExtent = d3.extent(movieData, function(d){return +d.avgReview;});
-															
-					xValue = function (d) {
-						return x(+d.avgReview);
-					}
-										
-					break;
-					
-				case 'numReview':
-					
-					x = d3.scale.linear().range([margin, w - margin]);
-				
-					xDomainExtent = d3.extent(movieData, function(d){return +d.numReview;});
-															
-					xValue = function (d) {
-						return x(+d.numReview);
-					}
-										
-					break;
-															
-				case 'relDate':
-				
-					var timeFormat = d3.time.format("%e-%b-%Y");
-					
-					xDomainExtent = d3.extent(movieData, function(d){ return timeFormat.parse(d.date); });
-										
-					x = d3.time.scale().range([margin, w - margin]);
-					
-					xValue = function (d) {
-						return x((timeFormat.parse(d.date)));
-					}
-												
-					break;
-					
-					
-			}
-			
-			xAxis.scale(x);
-		
-			x.domain(xDomainExtent);
-		
-			y.domain(yDomainExtent);
-			
-			zoomMovie.x(x).y(y);
-			
-			svgMovieContourGroup.attr("transform","scale(1)");
-													
-			svgMovieSelectionGroup.attr("transform", "scale(1)");
-			
-			svgMovieGroup.attr("transform", "scale(1)");
-
-			svgMovie.selectAll(".y.axis").transition()
-					.duration(1000)
-					.call(yAxis);
-			
-			svgMovie.selectAll(".x.axis").transition()
-					.duration(1000)
-					.call(xAxis);
-					
-			svgMovieBody.selectAll(".selectedCircle, .star").transition()
-				.duration(1000)
-				.attr('cx', xValue)
-				.attr("cy", yValue);	
-				
-			updateContour('movie',selectionStatesUser);	
-					
-	});
-	
-	
-    function updateContour(Space, SelectionStates) {
+	function updateContour(Space, SelectionStates) {
         
         var mySelectionStates = SelectionStates;
         
@@ -992,10 +913,131 @@ SelectionStatesSpace.prototype = {
                         });
                         
                                           
-                contourGroup.exit().transition().duration(500).remove();
+                contourGroup.exit().remove();
         
     }
 
+
+
+	$(function() {
+
+		$("#searchMovie").autocomplete({
+			source : movieTitle,
+			target : $('#suggestions'),
+
+			minLength : 1,
+			matchFromStart : false,
+
+			callback : function(e) {
+
+				var $a = $(e.currentTarget);
+				$('#searchMovie').val($a.text());
+				$('#searchMovie').autocomplete('clear');
+				
+				var index = movieTitleOrig.indexOf($a.text());
+
+                var selection = svgMovieGroup.selectAll("circle");
+                
+                var targetObject = selection.filter(function (d,i) { return i === index ? this:null;});
+
+				targetObject.on("click")(movieData[index],index);
+
+			}
+		});
+	});
+	
+	$('#movieXAxisMenu').on('change', function() {
+		
+		var $this = $(this),
+			val	= $this.val();
+			
+			switch (val) {
+				case 'sim1':
+				
+					x = d3.scale.linear().range([margin, w - margin]);
+
+					xDomainExtent = d3.extent(movieData, function(d){return +d.X;});
+															
+					xValue = function (d) {
+						return x(+d.X);
+					}
+												
+					break;
+					
+				case 'avgReview':
+				
+					x = d3.scale.linear().range([margin, w - margin]);
+
+					xDomainExtent = d3.extent(movieData, function(d){return +d.avgReview;});
+															
+					xValue = function (d) {
+						return x(+d.avgReview);
+					}
+										
+					break;
+					
+				case 'numReview':
+					
+					x = d3.scale.linear().range([margin, w - margin]);
+				
+					xDomainExtent = d3.extent(movieData, function(d){return +d.numReview;});
+															
+					xValue = function (d) {
+						return x(+d.numReview);
+					}
+										
+					break;
+															
+				case 'relDate':
+				
+					var timeFormat = d3.time.format("%e-%b-%Y");
+					
+					xDomainExtent = d3.extent(movieData, function(d){ return timeFormat.parse(d.date); });
+										
+					x = d3.time.scale().range([margin, w - margin]);
+					
+					xValue = function (d) {
+						return x((timeFormat.parse(d.date)));
+					}
+												
+					break;
+					
+					
+			}
+			
+			xAxis.scale(x);
+		
+			x.domain(xDomainExtent);
+		
+			y.domain(yDomainExtent);
+			
+			zoomMovie.x(x).y(y);
+			
+			svgMovieContourGroup.attr("transform","scale(1)");
+													
+			svgMovieSelectionGroup.attr("transform", "scale(1)");
+			
+			svgMovieGroup.attr("transform", "scale(1)");
+
+			svgMovie.selectAll(".y.axis").transition()
+					.duration(1000)
+					.call(yAxis);
+			
+			svgMovie.selectAll(".x.axis").transition()
+					.duration(1000)
+					.call(xAxis);
+					
+			svgMovieBody.selectAll(".selectedCircle, .star").transition()
+				.duration(1000)
+				.attr('cx', xValue)
+				.attr("cy", yValue);	
+				
+			updateContour('movie',selectionStatesUser);	
+					
+	});
+	
+	
+    
 	
 	$('#movieYAxisMenu').on('change', function() {
 		
