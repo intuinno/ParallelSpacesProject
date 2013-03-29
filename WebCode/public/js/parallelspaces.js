@@ -53,35 +53,35 @@ $('#page1').live('pageinit', function() {
 
             var mySelectionState = selectionState;
             
+            var mySelectionGroup, myQueryGroup, xSelect, ySelect, rSelect, xQuery,yQuery, rQuery;
+            
             if ( space === "movie") {
-                var mySelectionGroup = svgMovieSelectionGroup;
-                var myQueryGroup = svgUserSelectionGroup;
-                var xSelect = xValue;
-                var ySelect = yValue;
-                var rSelect = rMovieScale;
+                mySelectionGroup = svgMovieSelectionGroup;
+                myQueryGroup = svgUserSelectionGroup;
+                xSelect = xValue;
+                ySelect = yValue;
+                rSelect = rMovieScale;
                 
-                var xQuery = xValueUser;
-                var yQuery = yValueUser;
-                var rQuery = rUserScale;
+                xQuery = xValueUser;
+                yQuery = yValueUser;
+                rQuery = rUserScale;
                 
             } else if (space === 'user') {
-                var mySelectionGroup = svgUserSelectionGroup;
-                var myQueryGroup = svgMovieSelectionGroup;
+                mySelectionGroup = svgUserSelectionGroup;
+                myQueryGroup = svgMovieSelectionGroup;
                 
-                var xSelect = xValueUser;
-                var ySelect = yValueUser;
-                var rSelect = rUserScale;
+                xSelect = xValueUser;
+                 ySelect = yValueUser;
+                rSelect = rUserScale;
                 
-                var xQuery = xValue;
-                var yQuery = yValue;
-                var rQuery = rMovieScale;
+                xQuery = xValue;
+                yQuery = yValue;
+                rQuery = rMovieScale;
                 
                  }
 
             //Movie Selection Halo
-            mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
-                return +d.assignedClass;
-            }).enter().append("g").each(function(d, i) {
+            mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList).enter().append("g").each(function(d, i) {
 
                 var color = ordinalColor(d.assignedClass);
 
@@ -592,7 +592,7 @@ SelectionStatesSpace.prototype = {
 						return +d.num;
 					})
 					.enter()
-					.append("circle")
+					.append("svg:circle")
 					.classed("userCircle", true)
 					.classed("star", true)
 					.attr("cx", xValueUser)
@@ -642,8 +642,8 @@ SelectionStatesSpace.prototype = {
                                  
 			                     selectionStatesUser.add(tempQuerySet);
 			                     
-			                     x.domain(xDomainExtent);
-                                 y.domain(yDomainExtent);
+			                     xScaleUser.domain(xDomainExtentUser);
+                                 yScaleUser.domain(yDomainExtentUser);
                                 
                                 
                                  
@@ -699,6 +699,7 @@ SelectionStatesSpace.prototype = {
         svgUserContourGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		svgUserSelectionGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 		svgUserGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+		
 		svgUser.select(".x.axis").call(xAxisUser);
 		svgUser.select(".y.axis").call(yAxisUser);
 	}
