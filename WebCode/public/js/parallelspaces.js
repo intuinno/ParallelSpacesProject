@@ -87,19 +87,19 @@ $('#page1').live('pageinit', function() {
                 rQuery = rMovieScale;
                 
                  }
-        if(mySelectionState.querySetsList.length === 0) {
-               return;
-           }
+        
             //Selection Space Halo
             //Update + enter
             //Bind            
-            var selectedEntity = mySelectionGroup.selectAll(".selectionG").data(mySelectionState.querySetsList, function(d) { 
+            if( (mySelectionGroup.selectAll(".selectionG")[0].length !== 0 ) || (mySelectionState.querySetsList.length !== 0 )) { 
+                
+                var selectedEntity = mySelectionGroup.selectAll(".selectionG").data(mySelectionState.querySetsList, function(d) { 
                     return +d.assignedClass;
                     
             });
             
             //Enter 
-            selectedEntity.enter().append("g").classed(".selectionG",true);
+            selectedEntity.enter().append("g").classed("selectionG",true);
             
             //Enter + Update
             selectedEntity.each(function(d, i) {
@@ -129,17 +129,20 @@ $('#page1').live('pageinit', function() {
             //Exit Remove
             selectedEntity.exit().remove();
 
+                }
+            
             
             //Query Space Halo
             //Bind
            
+            if( (myQueryGroup.selectAll(".queryG")[0].length !== 0 ) || (mySelectionState.querySetsList.length !== 0 )) { 
            
             var queryEntity = myQueryGroup.selectAll(".queryG").data(mySelectionState.querySetsList, function(d) {
                 return +d.assignedClass;
             });
             
             //Enter Append
-            queryEntity.enter().append("g").classed(".queryG");
+            queryEntity.enter().append("g").classed("queryG",true);
                        
             //Enter + Update            
             queryEntity.each(function(d, i) {
@@ -168,6 +171,8 @@ $('#page1').live('pageinit', function() {
             
             //Exit Remove
             queryEntity.exit().remove();
+            
+            }
             
    
             updateContour(space, mySelectionState);
@@ -586,7 +591,7 @@ SelectionStatesSpace.prototype = {
 							
 							isMovieSelected = true;
 							clearSelection();
-							updateDisplay('movie', selectionStatesUser);
+							
 						
 						}
 						if (selectionStatesMovie.isSelected(d) === false) {
@@ -756,7 +761,6 @@ SelectionStatesSpace.prototype = {
 							
 							isMovieSelected = false;
 							clearSelection();
-							updateDisplay('user', selectionStatesMovie);
 						
 						}
 						if (selectionStatesUser.isSelected(d) === false) {
