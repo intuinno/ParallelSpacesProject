@@ -904,9 +904,6 @@ SelectionStatesSpace.prototype = {
                 var index = 0;
                 var myRating =0;
                 
-                if (isDen){
-                    return 1;
-                }
                 for (index =0; index < z.query.length; index++) {
                     myRating += ratings[z.query[index].num][d.index];    
                 } 
