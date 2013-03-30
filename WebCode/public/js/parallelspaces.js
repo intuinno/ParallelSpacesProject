@@ -22,6 +22,12 @@ $('#page1').live('pageinit', function() {
 		PSmax = +event.target.value;
 	});
 
+    $("#bandwidth").on("change", function(event) {
+
+        bandwidth = +event.target.value;
+    });
+    
+    
 	var w = 600;
 	var h = 600;
 	var margin = 20;
@@ -255,17 +261,19 @@ function reQuery(d) {
     
      
 //Class for one single selection    
-function QuerySets(domain, query, selection, newClass, mode, relationMin, relationMax, legend) {
+function QuerySets(domain, query, selection, newClass, groupMode, relationMin, relationMax, legend, contourMode, contourOn) {
     
     this.domain = domain; //domain can be 'user' or 'movie'
     this.query =query; 
     this.selection =selection;
     this.assignedClass= newClass;
     this.contourList = [];
-    this.mode = mode;  //mode can be  'single', 'groupOR','groupAND'
+    this.mode = groupMode;  //mode can be  'single', 'groupOR','groupAND'
     this.relationMin = relationMin;  //means a PSmin at the time of selection
     this.relationMax = relationMax; //means a PSmax at the time of selection
     this.legend = legend;
+    this.contourMode = contourMode;
+    this.contourOn = contourOn;
           
 }
 
@@ -383,6 +391,7 @@ SelectionStatesSpace.prototype = {
     var minStarRadius = 2;
     var fillMovieScale = d3.scale.pow(4).range(["white", "black"]);
     var fillUserScale = d3.scale.pow(4).range(["white", "black"]);
+    var bandwidth = 1;
     
     
     //Data for the Analysis
@@ -597,9 +606,9 @@ SelectionStatesSpace.prototype = {
                                  
                                  var newClass = selectionStatesMovie.newClass(); 
                                  var newQuery = [d];
-                                 var textLegend = d.title + " (Ratings " + PSmin + "-" + PSmax + ")";
+                                 var textLegend = d.title + " (Ratings " + PSmin + "-" + PSmax + ") " + $('input[name=contourMode]:checked').val();
                                  
-                                 var tempQuerySet = new QuerySets('movie',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax, textLegend);
+                                 var tempQuerySet = new QuerySets('movie',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax, textLegend, $('input[name=contourMode]:checked').val(),isContourOn);
                                  
                                  selectionStatesMovie.add(tempQuerySet);
                                  
@@ -767,9 +776,9 @@ SelectionStatesSpace.prototype = {
 			                     
 			                     var newClass = selectionStatesUser.newClass(); 
 			                     var newQuery = [d];
-			                     var textLegend = d.age + ", " + d.sex + ", " + d.job + " (Ratings " + PSmin + "-" + PSmax + ")";
+			                     var textLegend = d.age + ", " + d.sex + ", " + d.job + " (Ratings " + PSmin + "-" + PSmax + ") " + $('input[name=contourMode]:checked').val();
 			                     
-			                     var tempQuerySet = new QuerySets('user',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax, textLegend);
+			                     var tempQuerySet = new QuerySets('user',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax, textLegend,$('input[name=contourMode]:checked').val(),isContourOn);
                                  
 			                     selectionStatesUser.add(tempQuerySet);
 			                     
@@ -904,6 +913,12 @@ SelectionStatesSpace.prototype = {
                 var index = 0;
                 var myRating =0;
                 
+                if($('input[name=contourMode]:checked').val() === 'den'){
+            
+                    return 1;        
+                }
+            
+                
                 for (index =0; index < z.query.length; index++) {
                     myRating += ratings[z.query[index].num][d.index];    
                 } 
@@ -917,6 +932,11 @@ SelectionStatesSpace.prototype = {
                 var index = 0;
                 var myRating =0;
                 
+                 if($('input[name=contourMode]:checked').val() === 'den'){
+            
+                    return 1;        
+                }
+                
                 for (index =0; index < z.query.length; index++) {
                     myRating += ratings[d.num][z.query[index].index];    
                 } 
@@ -927,7 +947,7 @@ SelectionStatesSpace.prototype = {
 
 
 
-            var data2D = science.stats.kde2D(tempDataX, tempDataY, tempDataZ, XCoord, YCoord, XStep / 1, YStep / 1);
+            var data2D = science.stats.kde2D(tempDataX, tempDataY, tempDataZ, XCoord, YCoord, XStep / bandwidth, YStep / bandwidth);
             
             var minTemp = d3.min(data2D, function(d) { return d3.min(d);});
             var maxTemp = d3.max(data2D, function (d) { return d3.max(d);});
@@ -1554,6 +1574,21 @@ SelectionStatesSpace.prototype = {
             }
         
     });     	
+    
+      $('#contourON').on('change',function() {
+        
+        
+            var $this = $(this),
+            val = $this.val();
+            
+            if (val === 'on') {
+                
+                isContourOn = true;
+            } else {
+                isContourOn = false;
+            }
+        
+    });         
 	
 
 });

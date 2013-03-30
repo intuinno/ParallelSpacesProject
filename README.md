@@ -1,8 +1,16 @@
 ## 2013-03-30 1:04Am ##
 ### Change 
-Add a check button to disable contour plot
+Add a bandwidth 
 ### To Do 
+Add a support for Group selection
+Add a check button to enable group mode contour plot to show negative plot
+
+
+## 2013-03-30 1:04Am ##
+### Change 
 Add a check button to enable density mode vs amplitude mode
+### To Do 
+Add a support for Group selection
 Add a check button to enable group mode contour plot to show negative plot
 
 
