@@ -10,7 +10,7 @@ if( typeof Object.create !== 'function') {
 
 $('#page1').live('pageinit', function() {
 
-	var PSmin = 4.5, PSmax = 5;
+	var PSmin = 4, PSmax = 5;
 
 	$("#range-1a").on("change", function(event) {
 
@@ -160,16 +160,21 @@ $('#page1').live('pageinit', function() {
             //Exit Remove
             queryEntity.exit().remove();
             
+   
             updateContour(space, mySelectionState);
     
-            if(mySelectionState.querySetsList.length > 0 ) {
+
+
+
                 updateLegend(space, mySelectionState);
     
-            }        
+          
             
         }     
         
 function updateLegend(space, selectionState) {
+    
+   
     
     var myImage;
     
@@ -195,7 +200,44 @@ function updateLegend(space, selectionState) {
                 .attr("x",20)
                 .attr("width","50px")
                 .attr("height","50px");
-               
+                
+    if(selectionState.querySetsList.length === 0 ) {
+        
+        mySVGImage.remove();
+        
+    }
+                
+    var myLegendRect = svgLegend.selectAll("rect")
+                            .data(selectionState.querySetsList, function (d) { return +d.assignedClass;});
+                            
+    myLegendRect.enter().append("rect");
+    
+    myLegendRect.attr("x", "0px")
+                .attr("y",function(d,i) { 
+                    return i * 20 + 100;
+                })
+                .attr("width",10)
+                .attr("height",10)
+                .attr("fill", function(d,i) { return ordinalColor(+d.assignedClass);});
+                
+    myLegendRect.exit().remove();
+    
+    var myLegendText = svgLegend.selectAll(".legendText")
+                            .data(selectionState.querySetsList, function (d) { return +d.assignedClass;});
+                            
+    myLegendText.enter().append("text");
+    
+    myLegendText.attr("x", "12px")
+                .attr("y",function(d,i) { 
+                    return i * 20 + 108;
+                }) 
+                .attr("font-size","10px")
+                .classed("legendText",true)
+                .text( function(d,i) { return d.legend;});
+                
+    myLegendText.exit().remove();
+        
+    
    
 }
 
@@ -213,7 +255,7 @@ function reQuery(d) {
     
      
 //Class for one single selection    
-function QuerySets(domain, query, selection, newClass, mode, relationMin, relationMax) {
+function QuerySets(domain, query, selection, newClass, mode, relationMin, relationMax, legend) {
     
     this.domain = domain; //domain can be 'user' or 'movie'
     this.query =query; 
@@ -223,7 +265,7 @@ function QuerySets(domain, query, selection, newClass, mode, relationMin, relati
     this.mode = mode;  //mode can be  'single', 'groupOR','groupAND'
     this.relationMin = relationMin;  //means a PSmin at the time of selection
     this.relationMax = relationMax; //means a PSmax at the time of selection
-    
+    this.legend = legend;
           
 }
 
@@ -355,6 +397,7 @@ SelectionStatesSpace.prototype = {
     //State variable for the selection
 	var isMovieSelected = false;
 	var isGroupSelectionMode = false;
+	var isContourOn = true;
 	
     
 	
@@ -554,8 +597,9 @@ SelectionStatesSpace.prototype = {
                                  
                                  var newClass = selectionStatesMovie.newClass(); 
                                  var newQuery = [d];
+                                 var textLegend = d.title + " (Ratings " + PSmin + "-" + PSmax + ")";
                                  
-                                 var tempQuerySet = new QuerySets('movie',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax);
+                                 var tempQuerySet = new QuerySets('movie',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax, textLegend);
                                  
                                  selectionStatesMovie.add(tempQuerySet);
                                  
@@ -723,8 +767,9 @@ SelectionStatesSpace.prototype = {
 			                     
 			                     var newClass = selectionStatesUser.newClass(); 
 			                     var newQuery = [d];
+			                     var textLegend = d.age + ", " + d.sex + ", " + d.job + " (Ratings " + PSmin + "-" + PSmax + ")";
 			                     
-			                     var tempQuerySet = new QuerySets('user',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax);
+			                     var tempQuerySet = new QuerySets('user',newQuery, tempGalaxy, newClass,'single', PSmin, PSmax, textLegend);
                                  
 			                     selectionStatesUser.add(tempQuerySet);
 			                     
@@ -804,6 +849,10 @@ SelectionStatesSpace.prototype = {
 
 	function updateContour(Space, SelectionStates) {
         
+         if(isContourOn == false) {
+        return;
+    }
+    
         var mySelectionStates = SelectionStates;
         
         if (Space === 'movie') {
@@ -1477,13 +1526,34 @@ SelectionStatesSpace.prototype = {
                 .attr('cx', xValueUser)
                 .attr("cy", yValueUser);    
                 
+            
             updateContour('user',selectionStatesMovie);
-                
+            
             
                         
     });
 
-			
+	$('#resetButton').click(function() {
+	    
+
+	    clearSelection();
+	    
+    });	
+    
+    $('#contourON').on('change',function() {
+        
+        
+            var $this = $(this),
+            val = $this.val();
+            
+            if (val === 'on') {
+                
+                isContourOn = true;
+            } else {
+                isContourOn = false;
+            }
+        
+    });     	
 	
 
 });

@@ -1,3 +1,12 @@
+## 2013-03-30 1:04Am ##
+### Change 
+Add a check button to disable contour plot
+### To Do 
+Add a check button to enable density mode vs amplitude mode
+Add a check button to enable group mode contour plot to show negative plot
+
+
+
 ## 2013-03-29 6:45pm ##
 ### Change 
 Add an arrow 
