@@ -87,17 +87,19 @@ $('#page1').live('pageinit', function() {
                 rQuery = rMovieScale;
                 
                  }
-
+        if(mySelectionState.querySetsList.length === 0) {
+               return;
+           }
             //Selection Space Halo
             //Update + enter
             //Bind            
-            var selectedEntity = mySelectionGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) { 
+            var selectedEntity = mySelectionGroup.selectAll(".selectionG").data(mySelectionState.querySetsList, function(d) { 
                     return +d.assignedClass;
                     
             });
             
             //Enter 
-            selectedEntity.enter().append("g");
+            selectedEntity.enter().append("g").classed(".selectionG",true);
             
             //Enter + Update
             selectedEntity.each(function(d, i) {
@@ -131,12 +133,13 @@ $('#page1').live('pageinit', function() {
             //Query Space Halo
             //Bind
            
-            var queryEntity = myQueryGroup.selectAll("g").data(mySelectionState.querySetsList, function(d) {
+           
+            var queryEntity = myQueryGroup.selectAll(".queryG").data(mySelectionState.querySetsList, function(d) {
                 return +d.assignedClass;
             });
             
             //Enter Append
-            queryEntity.enter().append("g");
+            queryEntity.enter().append("g").classed(".queryG");
                        
             //Enter + Update            
             queryEntity.each(function(d, i) {
@@ -1259,7 +1262,9 @@ SelectionStatesSpace.prototype = {
 				wasYScaleUser = yScaleUser;
 		
 				var locationGroup = svgUserSelectionGroup.append("g").attr("id","states");
-		
+		          
+		          proj.translate([310,250]);
+		          proj.scale(600);
 		
 				d3.select("#states").selectAll("path")
 						.data(myStates.features)
@@ -1590,5 +1595,35 @@ SelectionStatesSpace.prototype = {
         
     });         
 	
+	d3.select("#saveas")
+	   .on("click", writeDownloadLink);
+	   
+	function writeDownloadLink(){
+    var html = d3.select("svg")
+        .attr("title", "test2")
+        .attr("version", 1.1)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .node().parentNode.innerHTML;
+
+    d3.select("body").append("div")
+        .attr("id", "download")
+        .style("top", event.clientY+20+"px")
+        .style("left", event.clientX+"px")
+        .html("Right-click on this preview and choose Save as<br />Left-Click to dismiss<br />")
+        .append("img")
+        .attr("src", "data:image/svg+xml;base64,"+ btoa(html));
+
+    d3.select("#download")
+        .on("click", function(){
+            if(event.button == 0){
+                d3.select(this).transition()
+                    .style("opacity", 0)
+                    .remove();
+            }
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 1);
+};
 
 });
