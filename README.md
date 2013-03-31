@@ -1,3 +1,12 @@
+## 2013-03-31 1:19PM ##
+### Change 
+Added a dynamic selection
+### To Do 
+Add a support for Group selection
+Add a check button to enable group mode contour plot to show negative plot
+
+
+
 ## 2013-03-30 1:04Am ##
 ### Change 
 Added a dynamic bandwith tuning

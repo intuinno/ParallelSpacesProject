@@ -18,8 +18,11 @@ $('#page1').live('pageinit', function() {
 		
 		 if(isMovieSelected) {
                 
+                
+                selectionStatesMovie.requeryCriteria(PSmin,PSmax);
                 updateDisplay('user',selectionStatesMovie);
             } else {
+                selectionStatesUser.requeryCriteria(PSmin,PSmax);
                 updateDisplay ('movie',selectionStatesUser);
             }
 	});
@@ -28,13 +31,17 @@ $('#page1').live('pageinit', function() {
 
 		PSmax = +event.target.value;
 		
-		 if(isMovieSelected) {
+           if(isMovieSelected) {
                 
+                
+                selectionStatesMovie.requeryCriteria(PSmin,PSmax);
                 updateDisplay('user',selectionStatesMovie);
             } else {
+                selectionStatesUser.requeryCriteria(PSmin,PSmax);
                 updateDisplay ('movie',selectionStatesUser);
-            }
-	});
+            }	
+            
+    });
 
     $("#bandwidth").on("change", function(event) {
 
@@ -203,7 +210,7 @@ $('#page1').live('pageinit', function() {
 
 
 
-                updateLegend(space, mySelectionState);
+            updateLegend(space, mySelectionState);
     
           
             
@@ -245,7 +252,7 @@ function updateLegend(space, selectionState) {
     }
                 
     var myLegendRect = svgLegend.selectAll("rect")
-                            .data(selectionState.querySetsList, function (d) { return +d.assignedClass;});
+                            .data(selectionState.querySetsList, function (d) { return d.legend;});
                             
     myLegendRect.enter().append("rect");
     
@@ -305,6 +312,8 @@ function QuerySets(domain, query, selection, newClass, groupMode, relationMin, r
     this.legend = legend;
     this.contourMode = contourMode;
     this.contourOn = contourOn;
+    
+    
           
 }
 
@@ -321,11 +330,58 @@ QuerySets.prototype = {
         
         this.query.splice(d,1);
         
-        this.selection = reQuery(this);
-    }
+        this.selection = this.requery();
+    },
     
+    //Using relationMin, relationMax, assignedClass, groupMode
+    //Updates legend, selection 
+   
     
-}
+        requery: function(newRelationMin, newRelationMax) {
+
+            this.relationMin = newRelationMin;
+            this.relationMax = newRelationMax;
+
+            if (this.query.length === 0) {
+                return [];
+            } else if (this.query.length === 1) {
+
+                var count = 0;
+                var tempGalaxy = [];
+
+                if (this.domain === 'user') {
+
+                    for ( count = 0; count < movieLength; count++) {
+
+                        if (ratings[this.query[0].num][count] >= this.relationMin && ratings[this.query[0].num][count] <= this.relationMax) {
+
+                            tempGalaxy.push(movieData[count]);
+                        }
+                    }
+
+                    this.legend = this.query[0].age + ", " + this.query[0].sex + ", " + this.query[0].job + " (Ratings " + this.relationMin + "-" + this.relationMax + ") " + $('input[name=contourMode]:checked').val();
+
+                } else if (this.domain === 'movie') {
+
+                    for ( count = 0; count < userLength; count++) {
+
+                        if (ratings[count][this.query[0].index] >= this.relationMin && ratings[count][this.query[0].index] <= this.relationMax) {
+
+                            tempGalaxy.push(userData[count]);
+                        }
+                    }
+
+                    this.legend = this.query[0].title + " (Ratings " + this.relationMin + "-" + this.relationMax + ") " + $('input[name=contourMode]:checked').val();
+
+                }
+
+                this.selection = tempGalaxy;
+
+            }
+        }
+
+        }
+
 
 function SelectionStatesSpace()  {
     
@@ -339,7 +395,9 @@ SelectionStatesSpace.prototype = {
     
     isSelected: function (d) {
         
-        for (var i=0;i<this.querySetsList.length;i++) {
+        var i;
+        
+        for ( i=0;i<this.querySetsList.length;i++) {
             if ( this.querySetsList[i].isSelected(d)) {
                 return true;
             }
@@ -390,6 +448,18 @@ SelectionStatesSpace.prototype = {
     remove: function (d) {
         
         this.querySetsList.splice(d,1);
+    },
+    
+    requeryCriteria: function (relMin, relMax)  {
+        
+        var i ;
+        
+        for (i=0; i< this.querySetsList.length; i++) {
+            
+            this.querySetsList[i].requery(relMin, relMax);
+            
+        }
+        
     }    
       
         
