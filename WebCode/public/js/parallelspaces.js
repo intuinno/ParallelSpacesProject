@@ -15,16 +15,39 @@ $('#page1').live('pageinit', function() {
 	$("#range-1a").on("change", function(event) {
 
 		PSmin = +event.target.value;
+		
+		 if(isMovieSelected) {
+                
+                updateDisplay('user',selectionStatesMovie);
+            } else {
+                updateDisplay ('movie',selectionStatesUser);
+            }
 	});
 
 	$("#range-1b").on("change", function(event) {
 
 		PSmax = +event.target.value;
+		
+		 if(isMovieSelected) {
+                
+                updateDisplay('user',selectionStatesMovie);
+            } else {
+                updateDisplay ('movie',selectionStatesUser);
+            }
 	});
 
     $("#bandwidth").on("change", function(event) {
 
         bandwidth = +event.target.value;
+        
+              
+            if(isMovieSelected) {
+                
+                updateDisplay('user',selectionStatesMovie);
+            } else {
+                updateDisplay ('movie',selectionStatesUser);
+            }
+        
     });
     
     
@@ -865,9 +888,7 @@ SelectionStatesSpace.prototype = {
 
 	function updateContour(Space, SelectionStates) {
         
-         if(isContourOn == false) {
-        return;
-    }
+     
     
         var mySelectionStates = SelectionStates;
         
@@ -892,6 +913,15 @@ SelectionStatesSpace.prototype = {
         }
         
                 
+     if(isContourOn == false) {
+         
+         svgMovieContourGroup.selectAll("g").remove();
+         svgUserContourGroup.selectAll("g").remove();
+        
+        
+        
+        return;
+    }
         var min=100, max=-100;
         
         var selectedData2D=[];
@@ -1582,22 +1612,29 @@ SelectionStatesSpace.prototype = {
                 isContourOn = false;
             }
         
+            if(isMovieSelected) {
+                
+                updateDisplay('user',selectionStatesMovie);
+            } else {
+                updateDisplay ('movie',selectionStatesUser);
+            }
     });     	
     
-      $('#contourON').on('change',function() {
+      $('input[name=contourMode]').on('change',function() {
         
         
-            var $this = $(this),
-            val = $this.val();
-            
-            if (val === 'on') {
+                  
+            if(isMovieSelected) {
                 
-                isContourOn = true;
+                updateDisplay('user',selectionStatesMovie);
             } else {
-                isContourOn = false;
+                updateDisplay ('movie',selectionStatesUser);
             }
-        
-    });         
+    });     
+    
+    
+    
+         
 	
 	d3.select("#saveas")
 	   .on("click", writeDownloadLink);

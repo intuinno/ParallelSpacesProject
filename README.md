@@ -1,5 +1,14 @@
 ## 2013-03-30 1:04Am ##
 ### Change 
+Added a dynamic bandwith tuning
+### To Do 
+Add a support for Group selection
+Add a check button to enable group mode contour plot to show negative plot
+
+
+
+## 2013-03-30 1:04Am ##
+### Change 
 Fix update display when null selection is applied to null space
 ### To Do 
 Add a support for Group selection
